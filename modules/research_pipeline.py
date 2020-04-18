@@ -4,13 +4,24 @@ Author: G Bettsworth
 
 import numpy as np
 import performance_measures as pm
+import cross_validation as cv
+import random
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import confusion_matrix
 
 
-def research_pipeline(train_set, train_targets, test_set, test_targets):
+def research_pipeline(train_set,
+                      train_targets,
+                      test_set,
+                      test_targets,
+                      kfolds=5
+                      ):
 
-    neighbours = KNeighborsClassifier(n_neighbors=3)
+    best_performances = cv.cross_validate_knn(train_set, train_targets, kfolds=kfolds)
+
+    k = random.choice(best_performances)
+
+    neighbours = KNeighborsClassifier(n_neighbors=k)
 
     knn_fit = neighbours.fit(train_set, train_targets)
 
