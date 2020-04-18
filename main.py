@@ -3,6 +3,7 @@ Author : G Bettsworth
 """
 
 import numpy as np
+import research_pipeline as rp
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
@@ -19,7 +20,7 @@ for name in array_dictionary_keys:
     array = np.genfromtxt(rf"{data_location}/{name}_question_datapoints.txt", skip_header=1)
     arrays[name] = array
 
-    target = np.genfromtxt(rf"{data_location}/{name}_question_targets.txt", skip_header=1)
+    target = np.genfromtxt(rf"{data_location}/{name}_question_targets.txt")
     targets[name] = target
 
 # principle components analysis to create another feature representation
@@ -37,4 +38,23 @@ for name in array_dictionary_keys:
 
 # implement research pipeline for all sets
 
+accuracy_ratio, conf_matrix, precision_value, recall_value, f1 = rp.research_pipeline(train_set=arrays['a_yn'],
+                                                                                      train_targets=targets['a_yn'],
+                                                                                      test_set=arrays['b_yn'],
+                                                                                      test_targets=targets['b_yn'],
+                                                                                      knn=True,
+                                                                                      svm=False,
+                                                                                      kfolds=5)
+
+print(accuracy_ratio, conf_matrix, precision_value, recall_value, f1)
+
+accuracy_ratio, conf_matrix, precision_value, recall_value, f1 = rp.research_pipeline(train_set=arrays['a_yn'],
+                                                                                      train_targets=targets['a_yn'],
+                                                                                      test_set=arrays['b_yn'],
+                                                                                      test_targets=targets['b_yn'],
+                                                                                      knn=False,
+                                                                                      svm=True,
+                                                                                      kfolds=5)
+
+print(accuracy_ratio, conf_matrix, precision_value, recall_value, f1)
 

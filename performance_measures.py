@@ -6,11 +6,12 @@ import numpy as np
 
 
 def accuracy(predicted, true):
+
     same_by_row = np.equal(predicted, true)
 
     accuracy_ratio = sum(same_by_row) / len(true)
 
-    return float(accuracy_ratio[0])
+    return accuracy_ratio
 
 
 def precision(confusion_matrix):
