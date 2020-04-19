@@ -45,7 +45,7 @@ def svm_prediction_pipeline(train_set,
     train_set = StandardScaler().fit_transform(train_set)
     test_set = StandardScaler().fit_transform(test_set)
 
-    best_performances = cv.cross_validate_svm(train_set, train_targets, 5)
+    best_performances = cv.cross_validate_svm(train_set, train_targets, kfolds=kfolds)
 
     k = random.choice(best_performances)
 
