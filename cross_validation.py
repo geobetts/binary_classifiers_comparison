@@ -15,15 +15,18 @@ def cross_validate_knn(train_set,
                        ks_to_test=20
                        ):
 
+    print("Cross Validation:")
+
     performance = {}
 
     k_neighbours = range(1, ks_to_test)
 
-    distances = ["euclidean", "manhattan", "chebyshev", "minkowski", "seuclidean"]
+    distances = ["euclidean", "manhattan", "chebyshev", "minkowski"]
 
     weights = ["uniform", "distance"]
 
-    leaf_size = range(20, 40)
+    # leaf size doesn't seem to affect quality
+    leaf_size = [30]
 
     params = [k_neighbours, distances, weights, leaf_size]
 
@@ -35,6 +38,8 @@ def cross_validate_knn(train_set,
         average = scores.mean()
 
         performance[k] = average
+
+        print(f"{k}. Score: {average}")
 
     maximum = max(performance.values())
 
@@ -48,6 +53,8 @@ def cross_validate_svm(train_set,
                        kfolds
                        ):
 
+    print("Cross Validation:")
+
     performance = {}
 
     C = list(range(1, 10))
@@ -56,7 +63,9 @@ def cross_validate_svm(train_set,
 
     kernels = ["linear", "poly", "rbf", "sigmoid"]
 
-    decision_function_shape = ["ovo", "ovr"]
+    # decision function shape doesn't seem to make a difference
+
+    decision_function_shape = ["ovr"]
 
     params = [C, gamma, kernels, decision_function_shape]
 
@@ -68,6 +77,8 @@ def cross_validate_svm(train_set,
         average = scores.mean()
 
         performance[k] = average
+
+        print(f"{k}. Score: {average}")
 
     maximum = max(performance.values())
 

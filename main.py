@@ -38,7 +38,7 @@ pca_fits = {}
 for name in array_dictionary_keys:
     scaled = StandardScaler().fit_transform(arrays[name])
     pca_fit = pca.fit_transform(scaled)
-    #print(f"explained variance for {name} is {pca.explained_variance_ratio_}")
+    print(f"explained variance for {name} is {pca.explained_variance_ratio_}")
     pca_fits[name + '_pca'] = pca_fit
 
 arrays.update(pca_fits)
