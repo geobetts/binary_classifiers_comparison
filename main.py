@@ -37,7 +37,7 @@ for name in array_dictionary_keys:
     pca_fit = pca.fit_transform(scaled)
     pca_fits[name + '_pca'] = pca_fit
 
-arrays = arrays.update(pca_fits)
+arrays.update(pca_fits)
 
 # now there are the original versions of each one plus the pca versions
 
