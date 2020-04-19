@@ -16,30 +16,26 @@ test_targets = np.tile(np.array([[1], [1], [0]]), (10, 1))
 
 
 def test_pipeline_with_knn():
-    accuracy_ratio, conf_matrix, precision_value, recall_value, f1 = rp.research_pipeline(train_set,
-                                                                                          train_targets,
-                                                                                          test_set,
-                                                                                          test_targets,
-                                                                                          model="knn")
+    outputs = rp.research_pipeline(train_set=train_set,
+                                   train_targets=train_targets,
+                                   test_set=test_set,
+                                   test_targets=test_targets,
+                                   train_set_name='train_set',
+                                   test_set_name='test_set',
+                                   model="knn")
 
-    print(f"accuracy of the model is: {accuracy_ratio}")
-    print(conf_matrix)
-    print(precision_value)
-    print(recall_value)
-    print(f1)
+    print(outputs)
     print("printed outputs work if you're reading this")
 
 
 def test_pipeline_with_svm():
-    accuracy_ratio, conf_matrix, precision_value, recall_value, f1 = rp.research_pipeline(train_set,
-                                                                                          train_targets,
-                                                                                          test_set,
-                                                                                          test_targets,
-                                                                                          model="svm")
+    outputs = rp.research_pipeline(train_set=train_set,
+                                   train_targets=train_targets,
+                                   test_set=test_set,
+                                   test_targets=test_targets,
+                                   train_set_name='train_set',
+                                   test_set_name='test_set',
+                                   model="svm")
 
-    print(f"accuracy of the model is: {accuracy_ratio}")
-    print(conf_matrix)
-    print(precision_value)
-    print(recall_value)
-    print(f1)
+    print(outputs)
     print("printed outputs work if you're reading this")

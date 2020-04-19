@@ -3,9 +3,11 @@ Author: G Bettsworth
 """
 
 import numpy as np
+import pandas as pd
 import performance_measures as pm
 import cross_validation as cv
 import random
+import time
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn import svm
@@ -17,7 +19,6 @@ def knn_prediction_pipeline(train_set,
                             test_set,
                             test_targets,
                             kfolds):
-
     train_set = StandardScaler().fit_transform(train_set)
     test_set = StandardScaler().fit_transform(test_set)
 
@@ -33,7 +34,7 @@ def knn_prediction_pipeline(train_set,
 
     predictions = predictions.reshape(test_targets.shape)
 
-    return predictions
+    return predictions, best_performances, k
 
 
 def svm_prediction_pipeline(train_set,
@@ -41,7 +42,6 @@ def svm_prediction_pipeline(train_set,
                             test_set,
                             test_targets,
                             kfolds):
-
     train_set = StandardScaler().fit_transform(train_set)
     test_set = StandardScaler().fit_transform(test_set)
 
@@ -57,29 +57,33 @@ def svm_prediction_pipeline(train_set,
 
     predictions = predictions.reshape(test_targets.shape)
 
-    return predictions
+    return predictions, best_performances, k
 
 
 def research_pipeline(train_set,
+                      train_set_name,
                       train_targets,
                       test_set,
+                      test_set_name,
                       test_targets,
                       model,
                       kfolds=5
                       ):
+    t = time.time()
+
     if model == "knn":
-        predictions = knn_prediction_pipeline(train_set,
-                                              train_targets,
-                                              test_set,
-                                              test_targets,
-                                              kfolds)
+        predictions, best_performances, k = knn_prediction_pipeline(train_set,
+                                                                    train_targets,
+                                                                    test_set,
+                                                                    test_targets,
+                                                                    kfolds)
 
     if model == "svm":
-        predictions = svm_prediction_pipeline(train_set,
-                                              train_targets,
-                                              test_set,
-                                              test_targets,
-                                              kfolds)
+        predictions, best_performances, k = svm_prediction_pipeline(train_set,
+                                                                    train_targets,
+                                                                    test_set,
+                                                                    test_targets,
+                                                                    kfolds)
 
     accuracy_ratio = pm.accuracy(predicted=predictions, true=test_targets)
 
@@ -88,4 +92,11 @@ def research_pipeline(train_set,
     recall_value = pm.recall(conf_matrix)
     f1 = pm.f1_score(conf_matrix)
 
-    return accuracy_ratio, conf_matrix, precision_value, recall_value, f1
+    t2 = time.time() - t
+
+    outputs = pd.DataFrame([train_set_name, test_set_name, model, best_performances, k,
+                            accuracy_ratio, conf_matrix, precision_value, recall_value, f1, t2])
+
+    outputs = outputs.transpose()
+
+    return outputs
