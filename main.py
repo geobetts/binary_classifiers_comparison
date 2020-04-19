@@ -4,10 +4,11 @@ Author : G Bettsworth
 
 import numpy as np
 import pandas as pd
-import research_pipeline as rp
 import time
+import itertools
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+import research_pipeline as rp
 
 data_location = r"../binary_classifiers_comparison_data"
 output_location = r"../binary_classifiers_comparison_outputs"
@@ -54,9 +55,11 @@ test_targets = ['b_wh', 'b_yn', 'a_wh', 'a_yn'] * 4
 
 models = ["knn"] * 8 + ["svm"] * 8
 
-for train_set, train_targets, test_set, test_targets, model in zip(trains, train_targets, tests, test_targets, models):
+for (train_set, train_targets, test_set, test_targets, model) in zip(trains, train_targets, tests, test_targets, models):
 
     t = time.time()
+
+    print(f"pipeline: train: {train_set}, test: {test_set}, using {model}")
 
     accuracy_ratio, conf_matrix, precision_value, recall_value, f1 = rp.research_pipeline(train_set=arrays[train_set],
                                                                                           train_targets=targets[train_targets],
