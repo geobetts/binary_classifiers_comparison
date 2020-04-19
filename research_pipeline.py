@@ -19,14 +19,17 @@ def knn_prediction_pipeline(train_set,
                             test_set,
                             test_targets,
                             kfolds):
+
     train_set = StandardScaler().fit_transform(train_set)
     test_set = StandardScaler().fit_transform(test_set)
 
-    best_performances = cv.cross_validate_knn(train_set, train_targets, kfolds=kfolds)
+    best_performances, maximum = cv.cross_validate_knn(train_set, train_targets, kfolds=kfolds)
+
+    random.seed(123)
 
     k = random.choice(best_performances)
 
-    neighbours = KNeighborsClassifier(n_neighbors=k)
+    neighbours = KNeighborsClassifier(n_neighbors=k[0], metric=k[1], weights=k[2], leaf_size=k[3])
 
     knn_fit = neighbours.fit(train_set, train_targets)
 
@@ -34,7 +37,7 @@ def knn_prediction_pipeline(train_set,
 
     predictions = predictions.reshape(test_targets.shape)
 
-    return predictions, best_performances, k
+    return predictions, best_performances, k, maximum
 
 
 def svm_prediction_pipeline(train_set,
@@ -42,14 +45,17 @@ def svm_prediction_pipeline(train_set,
                             test_set,
                             test_targets,
                             kfolds):
+
     train_set = StandardScaler().fit_transform(train_set)
     test_set = StandardScaler().fit_transform(test_set)
 
-    best_performances = cv.cross_validate_svm(train_set, train_targets, kfolds=kfolds)
+    best_performances, maximum = cv.cross_validate_svm(train_set, train_targets, kfolds=kfolds)
+
+    random.seed(123)
 
     k = random.choice(best_performances)
 
-    clf = svm.SVC(gamma='auto', kernel=k)
+    clf = svm.SVC(C=k[0], gamma=k[1], kernel=k[2], decision_function_shape=k[3], random_state=123)
 
     clf.fit(train_set, train_targets)
 
@@ -57,7 +63,7 @@ def svm_prediction_pipeline(train_set,
 
     predictions = predictions.reshape(test_targets.shape)
 
-    return predictions, best_performances, k
+    return predictions, best_performances, k, maximum
 
 
 def research_pipeline(train_set,
@@ -72,14 +78,14 @@ def research_pipeline(train_set,
     t = time.time()
 
     if model == "knn":
-        predictions, best_performances, k = knn_prediction_pipeline(train_set,
+        predictions, best_performances, k, maximum = knn_prediction_pipeline(train_set,
                                                                     train_targets,
                                                                     test_set,
                                                                     test_targets,
                                                                     kfolds)
 
     if model == "svm":
-        predictions, best_performances, k = svm_prediction_pipeline(train_set,
+        predictions, best_performances, k, maximum = svm_prediction_pipeline(train_set,
                                                                     train_targets,
                                                                     test_set,
                                                                     test_targets,
@@ -94,7 +100,7 @@ def research_pipeline(train_set,
 
     t2 = time.time() - t
 
-    outputs = pd.DataFrame([train_set_name, test_set_name, model, best_performances, k,
+    outputs = pd.DataFrame([train_set_name, test_set_name, model, best_performances, k, maximum,
                             accuracy_ratio, conf_matrix, precision_value, recall_value, f1, t2])
 
     outputs = outputs.transpose()

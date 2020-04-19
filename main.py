@@ -31,13 +31,14 @@ for name in array_dictionary_keys:
 
 # principle components analysis to create another feature representation
 # how do you choose number of components?
-pca = PCA(n_components=10)
+pca = PCA(n_components=20)
 
 pca_fits = {}
 
 for name in array_dictionary_keys:
     scaled = StandardScaler().fit_transform(arrays[name])
     pca_fit = pca.fit_transform(scaled)
+    #print(f"explained variance for {name} is {pca.explained_variance_ratio_}")
     pca_fits[name + '_pca'] = pca_fit
 
 arrays.update(pca_fits)
@@ -74,7 +75,7 @@ for (train_set, train_targets, test_set, test_targets, model) in zip(trains, tra
 
     performances = pd.concat([outputs, performances], ignore_index=True, axis=0)
 
-performances.columns = ['train_set', 'test_set', 'model', 'best_performances', 'chosen_performance',
+performances.columns = ['train_set', 'test_set', 'model', 'best_performances', 'chosen_performance', 'cv_accuracy_best',
                         'accuracy_ratio', 'confusion_matrix', 'precision', 'recall', 'f1', 'time']
 
 performances.to_csv(r"../binary_classifiers_comparison_outputs/model_performances.csv", index=False)
