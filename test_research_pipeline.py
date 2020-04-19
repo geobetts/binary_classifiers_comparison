@@ -20,8 +20,7 @@ def test_pipeline_with_knn():
                                                                                           train_targets,
                                                                                           test_set,
                                                                                           test_targets,
-                                                                                          knn=True,
-                                                                                          svm=False)
+                                                                                          model="knn")
 
     print(f"accuracy of the model is: {accuracy_ratio}")
     print(conf_matrix)
@@ -36,8 +35,7 @@ def test_pipeline_with_svm():
                                                                                           train_targets,
                                                                                           test_set,
                                                                                           test_targets,
-                                                                                          knn=False,
-                                                                                          svm=True)
+                                                                                          model="svm")
 
     print(f"accuracy of the model is: {accuracy_ratio}")
     print(conf_matrix)

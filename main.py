@@ -3,7 +3,9 @@ Author : G Bettsworth
 """
 
 import numpy as np
+import pandas as pd
 import research_pipeline as rp
+import time
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
@@ -32,29 +34,48 @@ pca_fits = {}
 for name in array_dictionary_keys:
     scaled = StandardScaler().fit_transform(arrays[name])
     pca_fit = pca.fit_transform(scaled)
-    pca_fits[name] = pca_fit
+    pca_fits[name + '_pca'] = pca_fit
+
+arrays = arrays.update(pca_fits)
 
 # now there are the original versions of each one plus the pca versions
 
 # implement research pipeline for all sets
 
-accuracy_ratio, conf_matrix, precision_value, recall_value, f1 = rp.research_pipeline(train_set=arrays['a_yn'],
-                                                                                      train_targets=targets['a_yn'],
-                                                                                      test_set=arrays['b_yn'],
-                                                                                      test_targets=targets['b_yn'],
-                                                                                      knn=True,
-                                                                                      svm=False,
-                                                                                      kfolds=5)
+performances = pd.DataFrame()
 
-print(accuracy_ratio, conf_matrix, precision_value, recall_value, f1)
+trains = ['a_wh', 'a_yn', 'b_wh', 'b_yn', 'a_wh_pca', 'a_yn_pca', 'b_wh_pca', 'b_yn_pca'] * 2
 
-accuracy_ratio, conf_matrix, precision_value, recall_value, f1 = rp.research_pipeline(train_set=arrays['a_yn'],
-                                                                                      train_targets=targets['a_yn'],
-                                                                                      test_set=arrays['b_yn'],
-                                                                                      test_targets=targets['b_yn'],
-                                                                                      knn=False,
-                                                                                      svm=True,
-                                                                                      kfolds=5)
+train_targets = ['a_wh', 'a_yn', 'b_wh', 'b_yn'] * 4
 
-print(accuracy_ratio, conf_matrix, precision_value, recall_value, f1)
+tests = ['b_wh', 'b_yn','a_wh', 'a_yn', 'b_wh_pca', 'b_yn_pca', 'a_wh_pca', 'a_yn_pca'] * 2
 
+test_targets = ['b_wh', 'b_yn', 'a_wh', 'a_yn'] * 4
+
+models = ["knn"] * 8 + ["svm"] * 8
+
+for train_set, train_targets, test_set, test_targets, model in zip(trains, train_targets, tests, test_targets, models):
+
+    t = time.time()
+
+    accuracy_ratio, conf_matrix, precision_value, recall_value, f1 = rp.research_pipeline(train_set=arrays[train_set],
+                                                                                          train_targets=targets[train_targets],
+                                                                                          test_set=arrays[test_set],
+                                                                                          test_targets=targets[test_targets],
+                                                                                          model=model,
+                                                                                          kfolds=5)
+
+    t2 = time.time() - t
+
+    other = pd.DataFrame([train_set, train_targets, model, accuracy_ratio,
+                          conf_matrix, precision_value, recall_value, f1, t2])
+
+    other = other.transpose()
+
+    performances = pd.concat([other, performances], ignore_index=True, axis=0)
+
+
+performances.columns = ['train_set', 'test_set', 'model', 'accuracy_ratio',
+                        'confusion_matrix', 'precision', 'recall', 'f1', 'time']
+
+performances.to_csv(r"../binary_classifiers_comparison_outputs/model_performances.csv", index=False)

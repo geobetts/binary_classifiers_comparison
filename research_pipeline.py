@@ -9,6 +9,7 @@ import random
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn import svm
+from sklearn.preprocessing import StandardScaler
 
 
 def knn_prediction_pipeline(train_set,
@@ -16,6 +17,10 @@ def knn_prediction_pipeline(train_set,
                             test_set,
                             test_targets,
                             kfolds):
+
+    train_set = StandardScaler().fit_transform(train_set)
+    test_set = StandardScaler().fit_transform(test_set)
+
     best_performances = cv.cross_validate_knn(train_set, train_targets, kfolds=kfolds)
 
     k = random.choice(best_performances)
@@ -36,6 +41,10 @@ def svm_prediction_pipeline(train_set,
                             test_set,
                             test_targets,
                             kfolds):
+
+    train_set = StandardScaler().fit_transform(train_set)
+    test_set = StandardScaler().fit_transform(test_set)
+
     best_performances = cv.cross_validate_svm(train_set, train_targets, 5)
 
     k = random.choice(best_performances)
@@ -55,18 +64,17 @@ def research_pipeline(train_set,
                       train_targets,
                       test_set,
                       test_targets,
-                      knn,
-                      svm,
+                      model,
                       kfolds=5
                       ):
-    if knn:
+    if model == "knn":
         predictions = knn_prediction_pipeline(train_set,
                                               train_targets,
                                               test_set,
                                               test_targets,
                                               kfolds)
 
-    if svm:
+    if model == "svm":
         predictions = svm_prediction_pipeline(train_set,
                                               train_targets,
                                               test_set,
