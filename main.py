@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import time
 import itertools
+import csv
 import random
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -31,15 +32,31 @@ for name in array_dictionary_keys:
 
 # principle components analysis to create another feature representation
 # how do you choose number of components?
-pca = PCA(n_components=20)
 
 pca_fits = {}
+pca_info = {}
 
 for name in array_dictionary_keys:
-    scaled = StandardScaler().fit_transform(arrays[name])
-    pca_fit = pca.fit_transform(scaled)
-    print(f"explained variance for {name} is {pca.explained_variance_ratio_}")
+    print(f"{name} pca")
+    explained_variance = 0
+    # already worked out max explained variance for the 4
+    components = 150
+
+    while explained_variance < 0.95:
+        print(f"Try {components + 1}")
+        components = components + 1
+        pca = PCA(n_components=components)
+        scaled = StandardScaler().fit_transform(arrays[name])
+        pca_fit = pca.fit_transform(scaled)
+        explained_variance = sum(pca.explained_variance_ratio_)
+
     pca_fits[name + '_pca'] = pca_fit
+    pca_info[name] = [components, pca.explained_variance_ratio_]
+
+with open(r"../binary_classifiers_comparison_outputs/pca_analysis.csv", 'w') as f:
+    writer = csv.writer(f)
+    for row in pca_info.items():
+        writer.writerow(row)
 
 arrays.update(pca_fits)
 
