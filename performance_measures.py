@@ -6,7 +6,6 @@ import numpy as np
 
 
 def accuracy(predicted, true):
-
     same_by_row = np.equal(predicted, true)
 
     accuracy_ratio = sum(same_by_row) / len(true)

@@ -34,32 +34,23 @@ for name in array_dictionary_keys:
 # principle components analysis to create another feature representation
 # how do you choose number of components?
 
-pca_fits = {}
-pca_info = {}
+tsne_fits = {}
 
 for name in array_dictionary_keys:
-    print(f"{name} pca")
-    explained_variance = 0
-    # already worked out max explained variance for the 4
-    components = 53
+    print(f"{name} tsne")
 
-    while explained_variance < 0.95:
-        print(f"Try {components + 1}")
-        components = components + 1
-        pca = PCA(n_components=components)
-        scaled = StandardScaler().fit_transform(arrays[name])
-        pca_fit = pca.fit_transform(scaled)
-        explained_variance = sum(pca.explained_variance_ratio_)
+    tsne = TSNE(n_components=3)
+    scaled = StandardScaler().fit_transform(arrays[name])
+    tsne_fit = tsne.fit_transform(scaled)
+    tsne_fits[name + '_tsne'] = tsne_fit
 
-    pca_fits[name + '_pca'] = pca_fit
-    pca_info[name] = [components, pca.explained_variance_ratio_]
+# might be interesting to include bothe pca and tsne and talk about differences
+# with open(r"../binary_classifiers_comparison_outputs/pca_analysis.csv", 'w') as f:
+#     writer = csv.writer(f)
+#     for row in pca_info.items():
+#         writer.writerow(row)
 
-with open(r"../binary_classifiers_comparison_outputs/pca_analysis.csv", 'w') as f:
-    writer = csv.writer(f)
-    for row in pca_info.items():
-        writer.writerow(row)
-
-arrays.update(pca_fits)
+arrays.update(tsne_fits)
 
 # now there are the original versions of each one plus the pca versions
 
@@ -67,11 +58,11 @@ arrays.update(pca_fits)
 
 performances = pd.DataFrame()
 
-trains = ['a_wh', 'a_yn', 'b_wh', 'b_yn', 'a_wh_pca', 'a_yn_pca', 'b_wh_pca', 'b_yn_pca'] * 2
+trains = ['a_wh', 'a_yn', 'b_wh', 'b_yn', 'a_wh_tsne', 'a_yn_tsne', 'b_wh_tsne', 'b_yn_tsne'] * 2
 
 train_targets = ['a_wh', 'a_yn', 'b_wh', 'b_yn'] * 4
 
-tests = ['b_wh', 'b_yn', 'a_wh', 'a_yn', 'b_wh_pca', 'b_yn_pca', 'a_wh_pca', 'a_yn_pca'] * 2
+tests = ['b_wh', 'b_yn', 'a_wh', 'a_yn', 'b_wh_tsne', 'b_yn_tsne', 'a_wh_tsne', 'a_yn_tsne'] * 2
 
 test_targets = ['b_wh', 'b_yn', 'a_wh', 'a_yn'] * 4
 
@@ -79,7 +70,6 @@ models = ["knn"] * 8 + ["svm"] * 8
 
 for (train_set, train_targets, test_set, test_targets, model) in zip(trains, train_targets, tests, test_targets,
                                                                      models):
-
     print(f"pipeline: train: {train_set}, test: {test_set}, using {model}")
 
     outputs = rp.research_pipeline(train_set=arrays[train_set],

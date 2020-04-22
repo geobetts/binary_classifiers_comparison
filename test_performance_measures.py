@@ -9,6 +9,7 @@ generic_confusion = np.array([[2, 4],
                               [8, 6]]
                              )
 
+
 def test_accuracy():
     output = pm.accuracy(predicted=np.array([[1], [0], [1], [0]]),
                          true=np.array([[1], [1], [1], [0]]))
@@ -31,4 +32,4 @@ def test_recall():
 def test_f1():
     f1 = pm.f1_score(generic_confusion)
 
-    assert f1 == 2 * (((2 / (2 + 4)) * (2 / (2 + 8)))/((2 / (2 + 4)) + (2 / (2 + 8))))
+    assert f1 == 2 * (((2 / (2 + 4)) * (2 / (2 + 8))) / ((2 / (2 + 4)) + (2 / (2 + 8))))
