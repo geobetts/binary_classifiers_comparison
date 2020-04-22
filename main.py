@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import time
 import itertools
+from sklearn.manifold import TSNE
 import csv
 import random
 from sklearn.decomposition import PCA
@@ -40,7 +41,7 @@ for name in array_dictionary_keys:
     print(f"{name} pca")
     explained_variance = 0
     # already worked out max explained variance for the 4
-    components = 150
+    components = 53
 
     while explained_variance < 0.95:
         print(f"Try {components + 1}")
@@ -88,7 +89,7 @@ for (train_set, train_targets, test_set, test_targets, model) in zip(trains, tra
                                    test_set_name=test_set,
                                    test_targets=targets[test_targets],
                                    model=model,
-                                   kfolds=5)
+                                   kfolds=10)
 
     performances = pd.concat([outputs, performances], ignore_index=True, axis=0)
 
