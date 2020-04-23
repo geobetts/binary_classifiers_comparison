@@ -12,11 +12,12 @@ import random
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import research_pipeline as rp
+from sklearn.decomposition import FastICA
 
 data_location = r"../binary_classifiers_comparison_data"
 output_location = r"../binary_classifiers_comparison_outputs"
 
-file_suffix = "pca_randomized_svd_50_comps"
+file_suffix = "ICA_100"
 
 random.seed(123)
 
@@ -41,18 +42,11 @@ info = {}
 
 for name in array_dictionary_keys:
     print(f"{name} fit")
-    components= 50
-    pca = PCA(n_components=components, svd_solver='randomized')
+    components=100
+    model = FastICA(n_components=components, whiten=True, max_iter=1000)
     scaled = StandardScaler().fit_transform(arrays[name])
-    fit = pca.fit_transform(scaled)
+    fit = model.fit_transform(scaled)
     fits[name + '_fit'] = fit
-    info[name] = pca.explained_variance_ratio_
-
-# might be interesting to include bothe pca and tsne and talk about differences
-with open(rf"../binary_classifiers_comparison_outputs/pca_analysis_{components}.csv", 'w') as f:
-    writer = csv.writer(f)
-    for row in info.items():
-        writer.writerow(row)
 
 arrays.update(fits)
 
