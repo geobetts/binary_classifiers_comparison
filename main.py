@@ -17,7 +17,8 @@ from sklearn.decomposition import FastICA
 data_location = r"../binary_classifiers_comparison_data"
 output_location = r"../binary_classifiers_comparison_outputs"
 
-file_suffix = "ICA_100"
+file_suffix = "all_ICA_5"
+all_versions = True
 
 random.seed(123)
 
@@ -42,8 +43,8 @@ info = {}
 
 for name in array_dictionary_keys:
     print(f"{name} fit")
-    components=100
-    model = FastICA(n_components=components, whiten=True, max_iter=1000)
+    components = 5
+    model = FastICA(n_components=components, whiten=True, max_iter=10000)
     scaled = StandardScaler().fit_transform(arrays[name])
     fit = model.fit_transform(scaled)
     fits[name + '_fit'] = fit
@@ -56,15 +57,27 @@ arrays.update(fits)
 
 performances = pd.DataFrame()
 
-trains = ['a_wh', 'a_yn', 'b_wh', 'b_yn', 'a_wh_fit', 'a_yn_fit', 'b_wh_fit', 'b_yn_fit'] * 2
+if all_versions:
+    trains = ['a_wh', 'a_yn', 'b_wh', 'b_yn', 'a_wh_fit', 'a_yn_fit', 'b_wh_fit', 'b_yn_fit'] * 2
 
-train_targets = ['a_wh', 'a_yn', 'b_wh', 'b_yn'] * 4
+    train_targets = ['a_wh', 'a_yn', 'b_wh', 'b_yn'] * 4
 
-tests = ['b_wh', 'b_yn', 'a_wh', 'a_yn', 'b_wh_fit', 'b_yn_fit', 'a_wh_fit', 'a_yn_fit'] * 2
+    tests = ['b_wh', 'b_yn', 'a_wh', 'a_yn', 'b_wh_fit', 'b_yn_fit', 'a_wh_fit', 'a_yn_fit'] * 2
 
-test_targets = ['b_wh', 'b_yn', 'a_wh', 'a_yn'] * 4
+    test_targets = ['b_wh', 'b_yn', 'a_wh', 'a_yn'] * 4
 
-models = ["knn"] * 8 + ["svm"] * 8
+    models = ["knn"] * 8 + ["svm"] * 8
+
+if not all_versions:
+    trains = ['a_wh_fit', 'a_yn_fit', 'b_wh_fit', 'b_yn_fit'] * 2
+
+    train_targets = ['a_wh', 'a_yn', 'b_wh', 'b_yn'] * 2
+
+    tests = ['b_wh_fit', 'b_yn_fit', 'a_wh_fit', 'a_yn_fit'] * 2
+
+    test_targets = ['b_wh', 'b_yn', 'a_wh', 'a_yn'] * 2
+
+    models = ["knn"] * 4 + ["svm"] * 4
 
 for (train_set, train_targets, test_set, test_targets, model) in zip(trains, train_targets, tests, test_targets,
                                                                      models):

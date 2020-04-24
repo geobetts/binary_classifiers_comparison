@@ -13,16 +13,16 @@ def accuracy(predicted, true):
     return accuracy_ratio
 
 
-def precision(confusion_matrix):
-    precision_value = confusion_matrix[0, 0] / (confusion_matrix[0, 0] + confusion_matrix[0, 1])
-
-    return precision_value
-
-
 def recall(confusion_matrix):
-    recall_value = confusion_matrix[0, 0] / (confusion_matrix[0, 0] + confusion_matrix[1, 0])
+    recall_value = confusion_matrix[0, 0] / (confusion_matrix[0, 0] + confusion_matrix[0, 1])
 
     return recall_value
+
+
+def precision(confusion_matrix):
+    precision_value = confusion_matrix[0, 0] / (confusion_matrix[0, 0] + confusion_matrix[1, 0])
+
+    return precision_value
 
 
 def f1_score(confusion_matrix):

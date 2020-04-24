@@ -20,13 +20,13 @@ def test_accuracy():
 def test_precision():
     precision_value = pm.precision(generic_confusion)
 
-    assert precision_value == (2 / (2 + 4))
+    assert precision_value == (2 / (2 + 8))
 
 
 def test_recall():
     recall_value = pm.recall(generic_confusion)
 
-    assert recall_value == (2 / (2 + 8))
+    assert recall_value == (2 / (2 + 4))
 
 
 def test_f1():
