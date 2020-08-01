@@ -9,7 +9,7 @@ import cross_validation as cv
 import random
 import time
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import confusion_matrix
+import sklearn.metrics
 from sklearn import svm
 from sklearn.preprocessing import StandardScaler
 
@@ -91,12 +91,12 @@ def research_pipeline(train_set,
                                                                     test_targets,
                                                                     kfolds)
 
-    accuracy_ratio = pm.accuracy(predicted=predictions, true=test_targets)
+    accuracy_ratio = sklearn.metrics.accuracy_score(y_true=test_targets, y_pred=predictions)
 
-    conf_matrix = confusion_matrix(y_true=test_targets, y_pred=predictions, labels=[1, 0])
-    precision_value = pm.precision(conf_matrix)
-    recall_value = pm.recall(conf_matrix)
-    f1 = pm.f1_score(conf_matrix)
+    conf_matrix = sklearn.metrics.confusion_matrix(y_true=test_targets, y_pred=predictions, labels=[1, 0])
+    precision_value = sklearn.metrics.precision_score(y_true=test_targets, y_pred=predictions)
+    recall_value = sklearn.metrics.recall_score(y_true=test_targets, y_pred=predictions)
+    f1 = sklearn.metrics.f1_score(y_true=test_targets, y_pred=predictions)
 
     t2 = time.time() - t
 
