@@ -3,94 +3,42 @@ Author: G Bettsworth
 """
 
 import numpy as np
-import pandas as pd
-import performance_measures as pm
-import cross_validation as cv
 import random
 import time
-from sklearn.neighbors import KNeighborsClassifier
 import sklearn.metrics
-from sklearn import svm
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import cross_validate
 
 
-def knn_prediction_pipeline(train_set,
-                            train_targets,
-                            test_set,
-                            test_targets,
-                            kfolds):
+def prediction_pipeline(train_set,
+                        train_targets,
+                        test_set,
+                        test_targets,
+                        model):
+    
+    t = time.time()
 
     train_set = StandardScaler().fit_transform(train_set)
     test_set = StandardScaler().fit_transform(test_set)
-
-    best_performances, maximum = cv.cross_validate_knn(train_set, train_targets, kfolds=kfolds)
+    
+    
+    performances = cross_validate(estimator=model.fit(train_set, train_targets), 
+                                  X=train_set, 
+                                  y=train_targets, 
+                                  return_estimator=True)
 
     random.seed(123)
 
-    k = random.choice(best_performances)
+    model_selected = random.choice(performances['estimator'])
 
-    neighbours = KNeighborsClassifier(n_neighbors=k[0], metric=k[1], weights=k[2], leaf_size=k[3])
+    neighbours = model_selected
 
     knn_fit = neighbours.fit(train_set, train_targets)
 
     predictions = knn_fit.predict(test_set)
 
     predictions = predictions.reshape(test_targets.shape)
-
-    return predictions, best_performances, k, maximum
-
-
-def svm_prediction_pipeline(train_set,
-                            train_targets,
-                            test_set,
-                            test_targets,
-                            kfolds):
-
-    train_set = StandardScaler().fit_transform(train_set)
-    test_set = StandardScaler().fit_transform(test_set)
-
-    best_performances, maximum = cv.cross_validate_svm(train_set, train_targets, kfolds=kfolds)
-
-    random.seed(123)
-
-    k = random.choice(best_performances)
-
-    clf = svm.SVC(C=k[0], gamma=k[1], kernel=k[2], decision_function_shape=k[3], random_state=123)
-
-    clf.fit(train_set, train_targets)
-
-    predictions = clf.predict(test_set)
-
-    predictions = predictions.reshape(test_targets.shape)
-
-    return predictions, best_performances, k, maximum
-
-
-def research_pipeline(train_set,
-                      train_set_name,
-                      train_targets,
-                      test_set,
-                      test_set_name,
-                      test_targets,
-                      model,
-                      kfolds=5
-                      ):
-    t = time.time()
-
-    if model == "knn":
-        predictions, best_performances, k, maximum = knn_prediction_pipeline(train_set,
-                                                                    train_targets,
-                                                                    test_set,
-                                                                    test_targets,
-                                                                    kfolds)
-
-    if model == "svm":
-        predictions, best_performances, k, maximum = svm_prediction_pipeline(train_set,
-                                                                    train_targets,
-                                                                    test_set,
-                                                                    test_targets,
-                                                                    kfolds)
-
+    
     accuracy_ratio = sklearn.metrics.accuracy_score(y_true=test_targets, y_pred=predictions)
 
     conf_matrix = sklearn.metrics.confusion_matrix(y_true=test_targets, y_pred=predictions, labels=[1, 0])
@@ -99,10 +47,19 @@ def research_pipeline(train_set,
     f1 = sklearn.metrics.f1_score(y_true=test_targets, y_pred=predictions)
 
     t2 = time.time() - t
-
-    outputs = pd.DataFrame([train_set_name, test_set_name, model, best_performances, k, maximum,
-                            accuracy_ratio, conf_matrix, precision_value, recall_value, f1, t2])
-
-    outputs = outputs.transpose()
+    
+    outputs = {'model' : model,
+               'cross_validation': performances,
+               'accuracy' : accuracy_ratio,
+               'conf_matrix' : conf_matrix,
+               'precision_value' : precision_value,
+               'recall_value' : recall_value,
+               'f1' : f1,
+               't2' : t2}
 
     return outputs
+
+
+
+
+
