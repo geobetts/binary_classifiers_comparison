@@ -8,14 +8,16 @@ import time
 import sklearn.metrics
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_validate
+import tensorflow as tf
+from tensorflow import keras
 
 
-def prediction_pipeline(train_set,
-                        train_targets,
-                        test_set,
-                        test_targets,
-                        model):
-    
+def sklearn_prediction_pipeline(train_set,
+                            train_targets,
+                            test_set,
+                            test_targets,
+                            model):
+        
     t = time.time()
 
     train_set = StandardScaler().fit_transform(train_set)
@@ -59,6 +61,30 @@ def prediction_pipeline(train_set,
 
     return outputs
 
+
+
+def tenserflow_prediction_pipeline(train_set,
+                                train_targets,
+                                test_set,
+                                test_targets):
+
+    model = keras.Sequential([
+        keras.layers.Dense(128, activation='relu'),
+        keras.layers.Dense(100, activation='relu'),
+        keras.layers.Dense(100, activation='relu'),
+        keras.layers.Dense(10)
+    ])
+    
+    model.compile(optimizer='adam',
+                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                  metrics=['accuracy'])
+    
+    
+    model.fit(train_set, train_targets, epochs=10)
+    
+    test_loss, test_acc = model.evaluate(test_set, test_targets, verbose=2)
+    
+    return test_acc
 
 
 

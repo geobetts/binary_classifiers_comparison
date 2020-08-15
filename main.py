@@ -21,27 +21,31 @@ target_a = np.genfromtxt(rf"{data_location}/a_wh_question_targets.txt")
 array_b = np.genfromtxt(rf"{data_location}/b_wh_question_datapoints.txt", skip_header=1)
 target_b = np.genfromtxt(rf"{data_location}/b_wh_question_targets.txt")
 
-knn_outputs = rp.prediction_pipeline(train_set=array_a,
-                                train_targets=target_a,
-                                test_set=array_b,
-                                test_targets=target_b,
-                                model=KNeighborsClassifier())
+knn_outputs = rp.sklearn_prediction_pipeline(train_set=array_a,
+                                            train_targets=target_a,
+                                            test_set=array_b,
+                                            test_targets=target_b,
+                                            model=KNeighborsClassifier())
 
-svc_outputs = rp.prediction_pipeline(train_set=array_a,
-                                train_targets=target_a,
-                                test_set=array_b,
-                                test_targets=target_b,
-                                model=SVC())
+svc_outputs = rp.sklearn_prediction_pipeline(train_set=array_a,
+                                            train_targets=target_a,
+                                            test_set=array_b,
+                                            test_targets=target_b,
+                                            model=SVC())
 
-rf_outputs = rp.prediction_pipeline(train_set=array_a,
-                                train_targets=target_a,
-                                test_set=array_b,
-                                test_targets=target_b,
-                                model=RandomForestClassifier())
+rf_outputs = rp.sklearn_prediction_pipeline(train_set=array_a,
+                                            train_targets=target_a,
+                                            test_set=array_b,
+                                            test_targets=target_b,
+                                            model=RandomForestClassifier())
 
-gb_outputs = rp.prediction_pipeline(train_set=array_a,
-                                train_targets=target_a,
-                                test_set=array_b,
-                                test_targets=target_b,
-                                model=GradientBoostingClassifier())
+gb_outputs = rp.sklearn_prediction_pipeline(train_set=array_a,
+                                            train_targets=target_a,
+                                            test_set=array_b,
+                                            test_targets=target_b,
+                                            model=GradientBoostingClassifier())
 
+tf_accuracy = rp.tenserflow_prediction_pipeline(train_set=array_a,
+                                        train_targets=target_a,
+                                        test_set=array_b,
+                                        test_targets=target_b)
