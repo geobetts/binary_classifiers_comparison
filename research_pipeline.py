@@ -48,8 +48,8 @@ def prediction_pipeline(train_set,
 
     t2 = time.time() - t
     
-    outputs = {'model' : model,
-               'cross_validation': performances,
+    outputs = {'model' : str(model),
+               'cross_validation': str(performances),
                'accuracy' : accuracy_ratio,
                'conf_matrix' : conf_matrix,
                'precision_value' : precision_value,
