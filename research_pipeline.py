@@ -19,6 +19,9 @@ def sklearn_prediction_pipeline(train_set,
                             model):
         
     t = time.time()
+    
+    print('--------------------------------------')
+    print(f'Model {model}')
 
     train_set = StandardScaler().fit_transform(train_set)
     test_set = StandardScaler().fit_transform(test_set)
@@ -67,6 +70,8 @@ def tenserflow_prediction_pipeline(train_set,
                                 train_targets,
                                 test_set,
                                 test_targets):
+    
+    print('tenserflow pipeline')
 
     model = keras.Sequential([
         keras.layers.Dense(128, activation='relu'),
