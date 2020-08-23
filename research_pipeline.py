@@ -3,6 +3,7 @@ Author: G Bettsworth
 """
 
 import numpy as np
+import pandas as pd
 import random
 import time
 import sklearn.metrics
@@ -74,18 +75,17 @@ def tenserflow_prediction_pipeline(train_set,
     print('tenserflow pipeline')
 
     model = keras.Sequential([
-        keras.layers.Dense(128, activation='relu'),
-        keras.layers.Dense(100, activation='relu'),
-        keras.layers.Dense(100, activation='relu'),
-        keras.layers.Dense(10)
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dense(10)
     ])
     
-    model.compile(optimizer='adam',
+    
+    model.compile(optimizer='RMSprop',
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
     
     
-    model.fit(train_set, train_targets, epochs=10)
+    model.fit(train_set, train_targets, epochs=1000)
     
     test_loss, test_acc = model.evaluate(test_set, test_targets, verbose=2)
     
