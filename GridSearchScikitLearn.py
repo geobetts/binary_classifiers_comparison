@@ -10,7 +10,6 @@ from random import seed
 from time import time
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
-
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
@@ -18,9 +17,7 @@ from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.dummy import DummyClassifier
-
 from pandas import DataFrame, Series
-
 from numpy import ndarray, genfromtxt
 
 data_location = r"../binary_classifiers_comparison_data"
