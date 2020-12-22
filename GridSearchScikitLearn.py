@@ -62,22 +62,33 @@ class GridSearchClassifier:
         Test targets (categories).
     classifiers: list
         List of Scikit-Learn classifiers.
+    weight: float, default=0.5
+        Weight for ranking the importance of accuracy as a measure of performance.
+        Time ranking is weighted by (1-weight).
     scaler: , default=StandardScaler()
         Scaler from the Scikit-Learn library.
     """
 
-    def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, scaler=StandardScaler()):
+    def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, weight=0.5, scaler=StandardScaler()):
         """
         Error logging performed and variables set.
         """
 
-        variables = [train_set, test_set, train_targets, test_targets, classifiers]
-        variable_names = ['train_set', 'test_set', 'train_targets', 'test_targets', 'classifiers']
-        types = [ndarray, ndarray, ndarray, ndarray, list]
+        variables = [train_set, test_set, train_targets, test_targets, classifiers, weight]
+        variable_names = ['train_set', 'test_set', 'train_targets', 'test_targets', 'classifiers', 'weight']
+        types = [ndarray, ndarray, ndarray, ndarray, list, float]
 
         for variable, name, variable_type in zip(variables, variable_names, types):
             if not isinstance(variable, variable_type):
                 raise TypeError(f"The variable {name} needs to be a {variable_type}")
+
+        if weight > 1.0:
+            raise ValueError(f"You have specified weight={weight}. This weight is too large,"
+                             f" it must be less than or equal to 1 and greater than or equal to 0.")
+
+        if weight < 0.0:
+            raise ValueError(f"You have specified weight={weight}. This weight is too small,"
+                             f" it must be greater than or equal to 0 and less than or equal to 1.")
 
         self.train_set = train_set
         self.test_set = test_set
@@ -85,6 +96,7 @@ class GridSearchClassifier:
         self.test_targets = test_targets
         self.scaler = scaler
         self.classifiers = classifiers
+        self.weight = weight
 
     def _pipeline(self, scaler, model):
         """
@@ -121,8 +133,10 @@ class GridSearchClassifier:
 
             df.loc[str(classifier)] = Series({'accuracy': score, 'time': time})
 
-            df['ranks'] = df['accuracy'].rank(ascending=False) + df['time'].rank()
+            df['ranks'] = self.weight*df['accuracy'].rank(ascending=False) + (1-self.weight)*df['time'].rank()
             df = df.sort_values(by=['ranks'])
+
+        print(f"Best performing algorithm: {df.index[0]}")
 
         return df
 
