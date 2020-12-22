@@ -34,7 +34,8 @@ target_a = genfromtxt(rf"{data_location}/a_wh_question_targets.txt")
 array_b = genfromtxt(rf"{data_location}/b_wh_question_datapoints.txt", skip_header=1)
 target_b = genfromtxt(rf"{data_location}/b_wh_question_targets.txt")
 
-classifiers = [DummyClassifier(strategy='most_frequent'), DecisionTreeClassifier(), KNeighborsClassifier(), RandomForestClassifier(),
+classifiers = [DummyClassifier(strategy='most_frequent'), DecisionTreeClassifier(), KNeighborsClassifier(),
+               RandomForestClassifier(),
                MLPClassifier(), SVC(), AdaBoostClassifier(), GaussianProcessClassifier()]
 
 scaler = StandardScaler()
@@ -43,7 +44,8 @@ test_set = array_b
 train_targets = target_a
 test_targets = target_b
 
-#TODO - add scaler error logging
+
+# TODO - add scaler error logging
 
 
 class GridSearchClassifier:
@@ -69,7 +71,8 @@ class GridSearchClassifier:
         Scaler from the Scikit-Learn library.
     """
 
-    def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, weight=0.5, scaler=StandardScaler()):
+    def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, weight=0.5,
+                 scaler=StandardScaler()):
         """
         Error logging performed and variables set.
         """
@@ -100,6 +103,19 @@ class GridSearchClassifier:
 
     def _pipeline(self, scaler, model):
         """
+        Train-test pipeline including scaling.
+
+        Parameters
+        -----------
+        scaler: Scikit-Learn scaler
+        model: Scikit-Learn classifier
+
+        Returns
+        --------
+        score: float
+            Accuracy score on test set.
+        time: float
+            Time taken in seconds for pipeline.
         """
 
         t = time()
@@ -117,6 +133,15 @@ class GridSearchClassifier:
         return score, final_time
 
     def fit(self):
+        """
+        Fit all classifiers in list to the train-test pipeline. Rank best performing on the basis of (weighted)
+        accuracy and time.
+
+        Returns
+        --------
+        df: pandas.DataFrame
+            DataFrame ranking each algorithm in order. Algorithm name is the index. Accuracy, time and ranks are reported.
+        """
 
         classifier_strings = [str(x) for x in classifiers]
 
@@ -133,7 +158,7 @@ class GridSearchClassifier:
 
             df.loc[str(classifier)] = Series({'accuracy': score, 'time': time})
 
-            df['ranks'] = self.weight*df['accuracy'].rank(ascending=False) + (1-self.weight)*df['time'].rank()
+            df['ranks'] = self.weight * df['accuracy'].rank(ascending=False) + (1 - self.weight) * df['time'].rank()
             df = df.sort_values(by=['ranks'])
 
         print(f"Best performing algorithm: {df.index[0]}")
@@ -142,5 +167,3 @@ class GridSearchClassifier:
 
 
 output = GridSearchClassifier(train_set, test_set, train_targets, test_targets, classifiers).fit()
-
-
