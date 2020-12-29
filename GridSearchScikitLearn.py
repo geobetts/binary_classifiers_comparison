@@ -8,6 +8,9 @@ Author: G Bettsworth
 
 from random import seed
 from time import time
+from unittest import TestCase, main
+
+from sklearn.datasets import make_classification
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
@@ -18,31 +21,18 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.dummy import DummyClassifier
 from pandas import DataFrame, Series
-from numpy import ndarray, genfromtxt
-
-data_location = r"../binary_classifiers_comparison_data"
-output_location = r"../binary_classifiers_comparison_outputs"
-
-seed(123)
-
-array_a = genfromtxt(rf"{data_location}/a_wh_question_datapoints.txt", skip_header=1)
-target_a = genfromtxt(rf"{data_location}/a_wh_question_targets.txt")
-
-array_b = genfromtxt(rf"{data_location}/b_wh_question_datapoints.txt", skip_header=1)
-target_b = genfromtxt(rf"{data_location}/b_wh_question_targets.txt")
-
-classifiers = [DummyClassifier(strategy='most_frequent'), DecisionTreeClassifier(), KNeighborsClassifier(),
-               RandomForestClassifier(),
-               MLPClassifier(), SVC(), AdaBoostClassifier(), GaussianProcessClassifier()]
-
-scaler = StandardScaler()
-train_set = array_a
-test_set = array_b
-train_targets = target_a
-test_targets = target_b
+from numpy import ndarray
 
 
-# TODO - add scaler error logging
+def scikit_learn_classifiers():
+    """
+    Returns all appropriate scikit learn classifiers in a list.
+    """
+    classifiers = [DummyClassifier(strategy='most_frequent'), DecisionTreeClassifier(), KNeighborsClassifier(),
+                   RandomForestClassifier(),
+                   MLPClassifier(), SVC(), AdaBoostClassifier(), GaussianProcessClassifier()]
+
+    return classifiers
 
 
 class GridSearchClassifier:
@@ -121,7 +111,7 @@ class GridSearchClassifier:
         train_set = fitted_scaler.transform(self.train_set)
         test_set = fitted_scaler.transform(self.test_set)
 
-        fitted_model = model.fit(X=train_set, y=train_targets)
+        fitted_model = model.fit(X=train_set, y=self.train_targets)
         predictions = fitted_model.predict(test_set)
 
         score = accuracy_score(y_true=self.test_targets, y_pred=predictions)
@@ -140,7 +130,7 @@ class GridSearchClassifier:
             DataFrame ranking each algorithm in order. Algorithm name is the index. Accuracy, time and ranks are reported.
         """
 
-        classifier_strings = [str(x) for x in classifiers]
+        classifier_strings = [str(x) for x in self.classifiers]
 
         df = DataFrame(columns=['accuracy', 'time'], index=classifier_strings)
 
@@ -163,4 +153,29 @@ class GridSearchClassifier:
         return df
 
 
-output = GridSearchClassifier(train_set, test_set, train_targets, test_targets, classifiers).fit()
+class TestGridSearchClassifier(TestCase):
+    """
+    Tests for GridSearchClassifier
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(TestGridSearchClassifier, self).__init__(*args, **kwargs)
+
+        self.train_set, self.train_targets = make_classification(n_samples=100, n_features=4,
+                                                                 n_informative=2, n_redundant=0,
+                                                                 random_state=123, shuffle=False)
+
+        self.test_set, self.test_targets = make_classification(n_samples=100, n_features=4,
+                                                               n_informative=2, n_redundant=0,
+                                                               random_state=123, shuffle=False)
+
+        self.classifiers = scikit_learn_classifiers()
+
+    def tests_positive(self):
+        output = GridSearchClassifier(self.train_set, self.test_set, self.train_targets,
+                                      self.test_targets, self.classifiers).fit()
+
+        print(output)
+
+
+main() if __name__ == '__main__' else None
