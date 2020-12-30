@@ -1,10 +1,14 @@
 """
 GridSearchScikitLearn
 
+Module to use a grid search to select an algorithm from scikit-learn for supervised learning tasks.
+
 Author: G Bettsworth
 
 2020
 """
+
+from fractions import Fraction
 from random import seed
 from time import time
 from unittest import TestCase, main
@@ -50,14 +54,17 @@ class GridSearchClassifier:
         Test targets (categories).
     classifiers: list
         List of Scikit-Learn classifiers.
-    weights: list of float, default=[0.3, 0.3, 0.3]
+    weights: list of float, default=[Fraction(1, 3)]*3
         Weight for ranking the importance of accuracy and time as a measure of performance.
-        The first element of the
+        The first element of the list is the weight for accuracy. The second element is the weight for training
+        time. The third element is the weight for testing time (a proxy for implementation time).
+        The weights must add up to 1.
+        The default is weight each number equally.
     scaler: , default=StandardScaler()
         Scaler from the Scikit-Learn library.
     """
 
-    def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, weights=[0.3, 0.3, 0.3],
+    def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, weights=[Fraction(1, 3)]*3,
                  scaler=StandardScaler()):
         """
         Error logging performed and variables set.
@@ -79,6 +86,9 @@ class GridSearchClassifier:
             if weight < 0.0:
                 raise ValueError(f"You have specified weight={weight}. This weight is too small,"
                                  f" it must be greater than or equal to 0 and less than or equal to 1.")
+
+        if sum(weights) != 1:
+            raise ValueError(f"The weights must add up to 1. The weights currently add up to {sum(weights)}")
 
         self.train_set = train_set
         self.test_set = test_set
@@ -167,11 +177,11 @@ class TestGridSearchClassifier(TestCase):
     def __init__(self, *args, **kwargs):
         super(TestGridSearchClassifier, self).__init__(*args, **kwargs)
 
-        train_set, train_targets = make_classification(n_samples=100, n_features=4,
+        train_set, train_targets = make_classification(n_samples=1000, n_features=4,
                                                        n_informative=2, n_redundant=0,
                                                        random_state=123, shuffle=False)
 
-        test_set, test_targets = make_classification(n_samples=100, n_features=4,
+        test_set, test_targets = make_classification(n_samples=1000, n_features=4,
                                                      n_informative=2, n_redundant=0,
                                                      random_state=123, shuffle=False)
 
@@ -179,16 +189,21 @@ class TestGridSearchClassifier(TestCase):
 
         seed(123)
 
+        # ranked on accuracy only to ensure tests are reproducible
         self.output = GridSearchClassifier(train_set, test_set, train_targets,
-                                           test_targets, classifiers).fit()
+                                           test_targets, classifiers, [1, 0, 0]).fit()
 
     def tests_index_of_output(self):
         """
-        Test that the index of the output dataframe is as expected
+        Test that the index of the output dataframe is as expected.
         """
-        expected = ['DecisionTreeClassifier()', "DummyClassifier(strategy='most_frequent')", 'SVC()',
-                    'GaussianProcessClassifier()', 'AdaBoostClassifier()', 'KNeighborsClassifier()',
-                    'RandomForestClassifier()', 'MLPClassifier()']
+        expected = ['DecisionTreeClassifier()', 'RandomForestClassifier()', 'AdaBoostClassifier()',
+                    'MLPClassifier()', 'SVC()', 'GaussianProcessClassifier()', 'KNeighborsClassifier()',
+                    "DummyClassifier(strategy='most_frequent')"]
+
+        print("TEST INDEX OF OUTPUT")
+        print("Actual index:")
+        print(list(self.output.index))
 
         self.assertListEqual(list(self.output.index), expected)
 
