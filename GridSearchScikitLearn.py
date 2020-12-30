@@ -5,7 +5,7 @@ Author: G Bettsworth
 
 2020
 """
-
+from random import seed
 from time import time
 from unittest import TestCase, main
 
@@ -21,8 +21,6 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.dummy import DummyClassifier
 from pandas import DataFrame, Series
 from numpy import ndarray
-
-#TODO - train time, test time
 
 
 def scikit_learn_classifiers():
@@ -52,34 +50,35 @@ class GridSearchClassifier:
         Test targets (categories).
     classifiers: list
         List of Scikit-Learn classifiers.
-    weight: float, default=0.5
-        Weight for ranking the importance of accuracy as a measure of performance.
-        Time ranking is weighted by (1-weight).
+    weights: list of float, default=[0.3, 0.3, 0.3]
+        Weight for ranking the importance of accuracy and time as a measure of performance.
+        The first element of the
     scaler: , default=StandardScaler()
         Scaler from the Scikit-Learn library.
     """
 
-    def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, weight=0.5,
+    def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, weights=[0.3, 0.3, 0.3],
                  scaler=StandardScaler()):
         """
         Error logging performed and variables set.
         """
 
-        variables = [train_set, test_set, train_targets, test_targets, classifiers, weight]
-        variable_names = ['train_set', 'test_set', 'train_targets', 'test_targets', 'classifiers', 'weight']
-        types = [ndarray, ndarray, ndarray, ndarray, list, float]
+        variables = [train_set, test_set, train_targets, test_targets, classifiers, weights]
+        variable_names = ['train_set', 'test_set', 'train_targets', 'test_targets', 'classifiers', 'weights']
+        types = [ndarray, ndarray, ndarray, ndarray, list, list]
 
         for variable, name, variable_type in zip(variables, variable_names, types):
             if not isinstance(variable, variable_type):
                 raise TypeError(f"The variable {name} needs to be a {variable_type}")
 
-        if weight > 1.0:
-            raise ValueError(f"You have specified weight={weight}. This weight is too large,"
-                             f" it must be less than or equal to 1 and greater than or equal to 0.")
+        for weight in weights:
+            if weight > 1.0:
+                raise ValueError(f"You have specified weight={weight}. This weight is too large,"
+                                 f" it must be less than or equal to 1 and greater than or equal to 0.")
 
-        if weight < 0.0:
-            raise ValueError(f"You have specified weight={weight}. This weight is too small,"
-                             f" it must be greater than or equal to 0 and less than or equal to 1.")
+            if weight < 0.0:
+                raise ValueError(f"You have specified weight={weight}. This weight is too small,"
+                                 f" it must be greater than or equal to 0 and less than or equal to 1.")
 
         self.train_set = train_set
         self.test_set = test_set
@@ -87,7 +86,7 @@ class GridSearchClassifier:
         self.test_targets = test_targets
         self.scaler = scaler
         self.classifiers = classifiers
-        self.weight = weight
+        self.weights = weights
 
     def _pipeline(self, scaler, model):
         """
@@ -149,7 +148,10 @@ class GridSearchClassifier:
 
             df.loc[str(classifier)] = Series({'accuracy': score, 'train_time': train_time, 'test_time': test_time})
 
-            df['ranks'] = self.weight * df['accuracy'].rank(ascending=False) + (1 - self.weight/2) * df['train_time'].rank() + (1 - self.weight/2) * df['test_time'].rank()
+            df['ranks'] = self.weights[0] * df['accuracy'].rank(ascending=False) + \
+                          self.weights[1] * df['train_time'].rank() + \
+                          self.weights[2] * df['test_time'].rank()
+
             df = df.sort_values(by=['ranks'])
 
         print(f"Best performing algorithm: {df.index[0]}")
@@ -165,21 +167,30 @@ class TestGridSearchClassifier(TestCase):
     def __init__(self, *args, **kwargs):
         super(TestGridSearchClassifier, self).__init__(*args, **kwargs)
 
-        self.train_set, self.train_targets = make_classification(n_samples=100, n_features=4,
-                                                                 n_informative=2, n_redundant=0,
-                                                                 random_state=123, shuffle=False)
+        train_set, train_targets = make_classification(n_samples=100, n_features=4,
+                                                       n_informative=2, n_redundant=0,
+                                                       random_state=123, shuffle=False)
 
-        self.test_set, self.test_targets = make_classification(n_samples=100, n_features=4,
-                                                               n_informative=2, n_redundant=0,
-                                                               random_state=123, shuffle=False)
+        test_set, test_targets = make_classification(n_samples=100, n_features=4,
+                                                     n_informative=2, n_redundant=0,
+                                                     random_state=123, shuffle=False)
 
-        self.classifiers = scikit_learn_classifiers()
+        classifiers = scikit_learn_classifiers()
 
-    def tests_positive(self):
-        output = GridSearchClassifier(self.train_set, self.test_set, self.train_targets,
-                                      self.test_targets, self.classifiers).fit()
+        seed(123)
 
-        print(output)
+        self.output = GridSearchClassifier(train_set, test_set, train_targets,
+                                           test_targets, classifiers).fit()
+
+    def tests_index_of_output(self):
+        """
+        Test that the index of the output dataframe is as expected
+        """
+        expected = ['DecisionTreeClassifier()', "DummyClassifier(strategy='most_frequent')", 'SVC()',
+                    'GaussianProcessClassifier()', 'AdaBoostClassifier()', 'KNeighborsClassifier()',
+                    'RandomForestClassifier()', 'MLPClassifier()']
+
+        self.assertListEqual(list(self.output.index), expected)
 
 
 main() if __name__ == '__main__' else None
