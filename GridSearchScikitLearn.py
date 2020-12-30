@@ -6,7 +6,6 @@ Author: G Bettsworth
 2020
 """
 
-from random import seed
 from time import time
 from unittest import TestCase, main
 
@@ -22,6 +21,8 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.dummy import DummyClassifier
 from pandas import DataFrame, Series
 from numpy import ndarray
+
+#TODO - train time, test time
 
 
 def scikit_learn_classifiers():
@@ -105,19 +106,21 @@ class GridSearchClassifier:
             Time taken in seconds for pipeline.
         """
 
-        t = time()
-
         fitted_scaler = scaler.fit(self.train_set)
         train_set = fitted_scaler.transform(self.train_set)
         test_set = fitted_scaler.transform(self.test_set)
 
+        t = time()
         fitted_model = model.fit(X=train_set, y=self.train_targets)
+        train_time = time() - t
+
+        t2 = time()
         predictions = fitted_model.predict(test_set)
+        test_time = time() - t2
 
         score = accuracy_score(y_true=self.test_targets, y_pred=predictions)
-        final_time = time() - t
 
-        return score, final_time
+        return score, train_time, test_time
 
     def fit(self):
         """
@@ -132,20 +135,21 @@ class GridSearchClassifier:
 
         classifier_strings = [str(x) for x in self.classifiers]
 
-        df = DataFrame(columns=['accuracy', 'time'], index=classifier_strings)
+        df = DataFrame(columns=['accuracy', 'train_time', 'test_time'], index=classifier_strings)
 
         for classifier in self.classifiers:
             print("--------------------------------------")
             print(f'Testing: {classifier}')
-            score, time = self._pipeline(scaler=self.scaler, model=classifier)
+            score, train_time, test_time = self._pipeline(scaler=self.scaler, model=classifier)
 
             print(f'Accuracy: {score}')
-            print(f'Time: {time}')
+            print(f'Training Time: {train_time}')
+            print(f'Testing Time: {test_time}')
             print("--------------------------------------")
 
-            df.loc[str(classifier)] = Series({'accuracy': score, 'time': time})
+            df.loc[str(classifier)] = Series({'accuracy': score, 'train_time': train_time, 'test_time': test_time})
 
-            df['ranks'] = self.weight * df['accuracy'].rank(ascending=False) + (1 - self.weight) * df['time'].rank()
+            df['ranks'] = self.weight * df['accuracy'].rank(ascending=False) + (1 - self.weight/2) * df['train_time'].rank() + (1 - self.weight/2) * df['test_time'].rank()
             df = df.sort_values(by=['ranks'])
 
         print(f"Best performing algorithm: {df.index[0]}")
