@@ -64,7 +64,7 @@ class GridSearchClassifier:
         Scaler from the Scikit-Learn library.
     """
 
-    def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, weights=[Fraction(1, 3)]*3,
+    def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, weights=[Fraction(1, 3)] * 3,
                  scaler=StandardScaler()):
         """
         Error logging performed and variables set.
@@ -206,6 +206,19 @@ class TestGridSearchClassifier(TestCase):
         print(list(self.output.index))
 
         self.assertListEqual(list(self.output.index), expected)
+
+    def test_accuracy_is_as_expected(self):
+        """
+        Test that the accuracy column is as expected.
+        """
+
+        expected = [1.0, 1.0, 1.0, 0.996, 0.996, 0.995, 0.993, 0.501]
+
+        print("TEST ACCURACY COLUMN OF OUTPUT")
+        print("Actual output:")
+        print(list(self.output.accuracy))
+
+        self.assertListEqual(list(self.output.accuracy), expected)
 
 
 main() if __name__ == '__main__' else None
