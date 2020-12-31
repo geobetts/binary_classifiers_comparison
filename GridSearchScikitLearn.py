@@ -169,13 +169,14 @@ class GridSearchClassifier:
         return df
 
 
-class TestGridSearchClassifier(TestCase):
+class TestGridSearchClassifierOutputIsUnchanged(TestCase):
     """
-    Tests for GridSearchClassifier
+    Tests that monitor changes to GridSearchClassifier. These tests allow for changes to be made to the source code
+    and to understand if outputs are effected.
     """
 
     def __init__(self, *args, **kwargs):
-        super(TestGridSearchClassifier, self).__init__(*args, **kwargs)
+        super(TestGridSearchClassifierOutputIsUnchanged, self).__init__(*args, **kwargs)
 
         train_set, train_targets = make_classification(n_samples=1000, n_features=4,
                                                        n_informative=2, n_redundant=0,
