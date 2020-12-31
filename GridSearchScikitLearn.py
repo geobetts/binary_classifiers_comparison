@@ -169,6 +169,9 @@ class GridSearchClassifier:
         return df
 
 
+# TODO - DecisionTree, AdaBoost and RandomForest all fit perfectly which means order changes.
+
+
 class TestGridSearchClassifierOutputIsUnchanged(TestCase):
     """
     Tests that monitor changes to GridSearchClassifier. These tests allow for changes to be made to the source code
@@ -191,8 +194,10 @@ class TestGridSearchClassifierOutputIsUnchanged(TestCase):
         seed(123)
 
         # ranked on accuracy only to ensure tests are reproducible
+        t = time()
         self.output = GridSearchClassifier(train_set, test_set, train_targets,
                                            test_targets, classifiers, [1, 0, 0]).fit()
+        self.overall_time = t - time()
 
     def tests_index_of_output(self):
         """
