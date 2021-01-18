@@ -13,7 +13,6 @@ from random import seed
 from time import time
 from unittest import TestCase, main
 
-from sklearn.datasets import make_classification
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
@@ -24,7 +23,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.dummy import DummyClassifier
 from pandas import DataFrame, Series
-from numpy import ndarray
+from numpy import ndarray, array
 
 
 def scikit_learn_classifiers():
@@ -181,13 +180,11 @@ class TestGridSearchClassifierOutputIsUnchanged(TestCase):
     def __init__(self, *args, **kwargs):
         super(TestGridSearchClassifierOutputIsUnchanged, self).__init__(*args, **kwargs)
 
-        train_set, train_targets = make_classification(n_samples=1000, n_features=4,
-                                                       n_informative=2, n_redundant=0,
-                                                       random_state=123, shuffle=False)
+        train_set = array([[1, 2, 3], [4, 5, 6], [1, 2, 3], [7, 8, 9], [1, 2, 4]])
+        train_targets = array([1, 0, 1, 0, 1])
 
-        test_set, test_targets = make_classification(n_samples=1000, n_features=4,
-                                                     n_informative=2, n_redundant=0,
-                                                     random_state=123, shuffle=False)
+        test_set = array([[1, 2, 3], [4, 5, 6], [1, 2, 4], [7, 9, 9]])
+        test_targets = array([1, 0, 1, 0])
 
         classifiers = scikit_learn_classifiers()
 
@@ -195,17 +192,24 @@ class TestGridSearchClassifierOutputIsUnchanged(TestCase):
 
         # ranked on accuracy only to ensure tests are reproducible
         t = time()
-        self.output = GridSearchClassifier(train_set, test_set, train_targets,
-                                           test_targets, classifiers, [1, 0, 0]).fit()
+        output = GridSearchClassifier(train_set, test_set, train_targets,
+                                      test_targets, classifiers, [1, 0, 0]).fit()
+
+        self.output = output.sort_index()
         self.overall_time = t - time()
 
     def tests_index_of_output(self):
         """
         Test that the index of the output dataframe is as expected.
         """
-        expected = ['DecisionTreeClassifier()', 'RandomForestClassifier()', 'AdaBoostClassifier()',
-                    'MLPClassifier()', 'SVC()', 'GaussianProcessClassifier()', 'KNeighborsClassifier()',
-                    "DummyClassifier(strategy='most_frequent')"]
+        expected = ['AdaBoostClassifier()',
+                    'DecisionTreeClassifier()',
+                    "DummyClassifier(strategy='most_frequent')",
+                    'GaussianProcessClassifier()',
+                    'KNeighborsClassifier()',
+                    'MLPClassifier()',
+                    'RandomForestClassifier()',
+                    'SVC()']
 
         print("TEST INDEX OF OUTPUT")
         print("Actual index:")
@@ -218,7 +222,7 @@ class TestGridSearchClassifierOutputIsUnchanged(TestCase):
         Test that the accuracy column is as expected.
         """
 
-        expected = [1.0, 1.0, 1.0, 0.996, 0.996, 0.995, 0.993, 0.501]
+        expected = [1.0, 1.0, 0.5, 1.0, 0.5, 1.0, 1.0, 1.0]
 
         print("TEST ACCURACY COLUMN OF OUTPUT")
         print("Actual output:")
