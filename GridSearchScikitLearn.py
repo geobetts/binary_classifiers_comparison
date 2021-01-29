@@ -37,6 +37,29 @@ def scikit_learn_classifiers():
     return classifiers
 
 
+def scikit_learn_classifiers_and_parameters():
+    """
+    Returns all appropriate scikit learn classifiers with all possible parameters in a list.
+    """
+
+    classifiers = []
+
+    criterion = ['gini', 'entropy']
+    splitter = ['best', 'random']
+    max_features = ['auto', 'sqrt', 'log2']
+
+    all_criterion = criterion*len(splitter)*len(max_features)
+    all_splitter = splitter * len(criterion) * len(max_features)
+    all_max_features = max_features * len(splitter) * len(criterion)
+
+    for x, y, z in zip(all_criterion, all_splitter, all_max_features):
+        classifiers.append(DecisionTreeClassifier(criterion=x,
+                                                  splitter=y,
+                                                  max_features=z))
+
+    return classifiers
+
+
 class GridSearchClassifier:
     """
     Tool to try different Scikit-Learn classifiers for a given classification task.

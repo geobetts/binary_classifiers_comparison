@@ -6,7 +6,7 @@ The task is to correctly identify when someone was a question beginning with 'wh
 Data has been labelled.
 """
 
-from GridSearchScikitLearn import GridSearchClassifier, scikit_learn_classifiers
+from GridSearchScikitLearn import GridSearchClassifier, scikit_learn_classifiers, scikit_learn_classifiers_and_parameters
 
 from numpy import genfromtxt
 
@@ -27,3 +27,15 @@ output = GridSearchClassifier(train_set=array_b,
                               train_targets=target_b,
                               test_targets=target_a,
                               classifiers=scikit_learn_classifiers()).fit()
+
+output = GridSearchClassifier(train_set=array_a,
+                              test_set=array_b,
+                              train_targets=target_a,
+                              test_targets=target_b,
+                              classifiers=scikit_learn_classifiers_and_parameters()).fit()
+
+output = GridSearchClassifier(train_set=array_b,
+                              test_set=array_a,
+                              train_targets=target_b,
+                              test_targets=target_a,
+                              classifiers=scikit_learn_classifiers_and_parameters()).fit()
