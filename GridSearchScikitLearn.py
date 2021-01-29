@@ -46,16 +46,23 @@ def scikit_learn_classifiers_and_parameters():
 
     criterion = ['gini', 'entropy']
     splitter = ['best', 'random']
-    max_features = ['auto', 'sqrt', 'log2']
+    max_features = ['auto', 'sqrt', 'log2', None]
 
-    all_criterion = criterion*len(splitter)*len(max_features)
-    all_splitter = splitter * len(criterion) * len(max_features)
-    all_max_features = max_features * len(splitter) * len(criterion)
+    # the ideal min_samples_split values tend to be between 1 to 40 for the
+    # CART algorithm which is the algorithm implemented in scikit-learn. min_samples_split is
+    # used to control over-fitting (Mantovani et al, 2018).
+    min_samples_split = list(range(2, 41))
 
-    for x, y, z in zip(all_criterion, all_splitter, all_max_features):
-        classifiers.append(DecisionTreeClassifier(criterion=x,
-                                                  splitter=y,
-                                                  max_features=z))
+    all_criterion = criterion * len(splitter) * len(max_features) * len(min_samples_split)
+    all_splitter = splitter * len(criterion) * len(max_features) * len(min_samples_split)
+    all_max_features = max_features * len(splitter) * len(criterion) * len(min_samples_split)
+    all_min_samples_split = min_samples_split * len(splitter) * len(criterion) * len(all_max_features)
+
+    for a, b, c, d in zip(all_criterion, all_splitter, all_max_features, all_min_samples_split):
+        classifiers.append(DecisionTreeClassifier(criterion=a,
+                                                  splitter=b,
+                                                  max_features=c,
+                                                  min_samples_split=d))
 
     return classifiers
 
@@ -178,7 +185,10 @@ class GridSearchClassifier:
             print(f'Testing Time: {test_time}')
             print("--------------------------------------")
 
-            df.loc[str(classifier)] = Series({'accuracy': score, 'train_time': train_time, 'test_time': test_time})
+            try:
+                df.loc[str(classifier)] = Series({'accuracy': score, 'train_time': train_time, 'test_time': test_time})
+            except ValueError:
+                df.loc[classifier] = Series({'accuracy': score, 'train_time': train_time, 'test_time': test_time})
 
             df['ranks'] = self.weights[0] * df['accuracy'].rank(ascending=False) + \
                           self.weights[1] * df['train_time'].rank() + \
