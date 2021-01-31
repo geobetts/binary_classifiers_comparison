@@ -51,8 +51,7 @@ def scikit_learn_classifiers_and_parameters():
     max_features = ['auto', 'sqrt', 'log2', None]
 
     # the ideal min_samples_split values tend to be between 1 to 40 for the
-    # CART algorithm which is the algorithm implemented in scikit-learn. min_samples_split is
-    # used to control over-fitting (Mantovani et al, 2018).
+    # CART algorithm which is the algorithm implemented in scikit-learn (Mantovani et al, 2018).
     min_samples_split = list(range(2, 41))
 
     params = list(product(criterion, splitter, max_features, min_samples_split))
