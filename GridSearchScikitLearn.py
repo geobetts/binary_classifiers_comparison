@@ -25,6 +25,8 @@ from sklearn.dummy import DummyClassifier
 from pandas import DataFrame, Series
 from numpy import ndarray, array
 
+from itertools import product
+
 
 def scikit_learn_classifiers():
     """
@@ -53,16 +55,13 @@ def scikit_learn_classifiers_and_parameters():
     # used to control over-fitting (Mantovani et al, 2018).
     min_samples_split = list(range(2, 41))
 
-    all_criterion = criterion * len(splitter) * len(max_features) * len(min_samples_split)
-    all_splitter = splitter * len(criterion) * len(max_features) * len(min_samples_split)
-    all_max_features = max_features * len(splitter) * len(criterion) * len(min_samples_split)
-    all_min_samples_split = min_samples_split * len(splitter) * len(criterion) * len(all_max_features)
+    params = list(product(criterion, splitter, max_features, min_samples_split))
 
-    for a, b, c, d in zip(all_criterion, all_splitter, all_max_features, all_min_samples_split):
-        classifiers.append(DecisionTreeClassifier(criterion=a,
-                                                  splitter=b,
-                                                  max_features=c,
-                                                  min_samples_split=d))
+    for x in params:
+        classifiers.append(DecisionTreeClassifier(criterion=x[0],
+                                                  splitter=x[1],
+                                                  max_features=x[2],
+                                                  min_samples_split=x[3]))
 
     return classifiers
 
@@ -176,14 +175,7 @@ class GridSearchClassifier:
         df = DataFrame(columns=['accuracy', 'train_time', 'test_time'], index=classifier_strings)
 
         for classifier in self.classifiers:
-            print("--------------------------------------")
-            print(f'Testing: {classifier}')
             score, train_time, test_time = self._pipeline(scaler=self.scaler, model=classifier)
-
-            print(f'Accuracy: {score}')
-            print(f'Training Time: {train_time}')
-            print(f'Testing Time: {test_time}')
-            print("--------------------------------------")
 
             try:
                 df.loc[str(classifier)] = Series({'accuracy': score, 'train_time': train_time, 'test_time': test_time})
