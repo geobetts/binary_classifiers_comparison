@@ -54,11 +54,21 @@ def scikit_learn_classifiers_and_parameters():
     # CART algorithm which is the algorithm implemented in scikit-learn (Mantovani et al, 2018).
     min_samples_split = list(range(2, 41))
 
-    params = list(product(criterion, splitter, max_features, min_samples_split))
+    dt_params = list(product(criterion, splitter, max_features, min_samples_split))
 
-    for x in params:
+    for x in dt_params:
         classifiers.append(DecisionTreeClassifier(criterion=x[0],
                                                   splitter=x[1],
+                                                  max_features=x[2],
+                                                  min_samples_split=x[3]))
+
+    n_estimators = list(range(2, 401))
+
+    rf_params = list(product(n_estimators, criterion, max_features, min_samples_split))
+
+    for x in rf_params:
+        classifiers.append(RandomForestClassifier(n_estimators=x[0],
+                                                  criterion=x[1],
                                                   max_features=x[2],
                                                   min_samples_split=x[3]))
 
