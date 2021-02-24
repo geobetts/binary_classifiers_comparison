@@ -25,8 +25,6 @@ from sklearn.dummy import DummyClassifier
 from pandas import DataFrame, Series
 from numpy import ndarray, array
 
-from itertools import product
-
 
 def scikit_learn_classifiers():
     """
@@ -35,42 +33,6 @@ def scikit_learn_classifiers():
     classifiers = [DummyClassifier(strategy='most_frequent'), DecisionTreeClassifier(), KNeighborsClassifier(),
                    RandomForestClassifier(),
                    MLPClassifier(), SVC(), AdaBoostClassifier(), GaussianProcessClassifier()]
-
-    return classifiers
-
-
-def scikit_learn_classifiers_and_parameters():
-    """
-    Returns all appropriate scikit learn classifiers with all possible parameters in a list.
-    """
-
-    classifiers = []
-
-    criterion = ['gini', 'entropy']
-    splitter = ['best', 'random']
-    max_features = ['auto', 'sqrt', 'log2', None]
-
-    # the ideal min_samples_split values tend to be between 1 to 40 for the
-    # CART algorithm which is the algorithm implemented in scikit-learn (Mantovani et al, 2018).
-    min_samples_split = list(range(2, 41))
-
-    dt_params = list(product(criterion, splitter, max_features, min_samples_split))
-
-    for x in dt_params:
-        classifiers.append(DecisionTreeClassifier(criterion=x[0],
-                                                  splitter=x[1],
-                                                  max_features=x[2],
-                                                  min_samples_split=x[3]))
-
-    n_estimators = list(range(2, 401))
-
-    rf_params = list(product(n_estimators, criterion, max_features, min_samples_split))
-
-    for x in rf_params:
-        classifiers.append(RandomForestClassifier(n_estimators=x[0],
-                                                  criterion=x[1],
-                                                  max_features=x[2],
-                                                  min_samples_split=x[3]))
 
     return classifiers
 
@@ -184,6 +146,7 @@ class GridSearchClassifier:
         df = DataFrame(columns=['accuracy', 'train_time', 'test_time'], index=classifier_strings)
 
         for classifier in self.classifiers:
+            print(f'Testing algorithm: {classifier}')
             score, train_time, test_time = self._pipeline(scaler=self.scaler, model=classifier)
 
             try:
@@ -200,9 +163,6 @@ class GridSearchClassifier:
         print(f"Best performing algorithm: {df.index[0]}")
 
         return df
-
-
-# TODO - DecisionTree, AdaBoost and RandomForest all fit perfectly which means order changes.
 
 
 class TestGridSearchClassifierOutputIsUnchanged(TestCase):
