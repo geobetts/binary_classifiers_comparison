@@ -57,3 +57,11 @@ output_a_dt_models = GridSearchClassifier(train_set=array_b,
                                           train_targets=target_b,
                                           test_targets=target_a,
                                           classifiers=classifiers).fit()
+
+# use F1 instead
+output_a_dt_models_f1 = GridSearchClassifier(train_set=array_b,
+                                             test_set=array_a,
+                                             train_targets=target_b,
+                                             test_targets=target_a,
+                                             classifiers=classifiers,
+                                             score='f1_score').fit()

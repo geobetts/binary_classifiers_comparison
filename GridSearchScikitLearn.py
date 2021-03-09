@@ -13,7 +13,7 @@ from random import seed
 from time import time
 from unittest import TestCase, main
 
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
@@ -59,19 +59,22 @@ class GridSearchClassifier:
         time. The third element is the weight for testing time (a proxy for implementation time).
         The weights must add up to 1.
         The default is weight each number equally.
-    scaler: , default=StandardScaler()
+    scaler: scikit-learn scaler, default=StandardScaler()
         Scaler from the Scikit-Learn library.
+    score: str, (default='accuarcy_score')
+        score used to measure performance options - 'accuracy_score', 'f1_score'
     """
 
     def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, weights=[Fraction(1, 3)] * 3,
-                 scaler=StandardScaler()):
+                 scaler=StandardScaler(), score='accuracy_score'):
         """
         Error logging performed and variables set.
         """
 
         variables = [train_set, test_set, train_targets, test_targets, classifiers, weights]
-        variable_names = ['train_set', 'test_set', 'train_targets', 'test_targets', 'classifiers', 'weights']
-        types = [ndarray, ndarray, ndarray, ndarray, list, list]
+        variable_names = ['train_set', 'test_set', 'train_targets', 
+                          'test_targets', 'classifiers', 'weights', 'score']
+        types = [ndarray, ndarray, ndarray, ndarray, list, list, str]
 
         for variable, name, variable_type in zip(variables, variable_names, types):
             if not isinstance(variable, variable_type):
@@ -88,6 +91,10 @@ class GridSearchClassifier:
 
         if sum(weights) != 1:
             raise ValueError(f"The weights must add up to 1. The weights currently add up to {sum(weights)}")
+        
+        if score not in ['accuracy_score', 'f1_score']:
+            raise ValueError(f"{score} is not an option for score. "
+                             f"The current options for score are 'accuracy_score', 'f1_score'")
 
         self.train_set = train_set
         self.test_set = test_set
@@ -96,6 +103,7 @@ class GridSearchClassifier:
         self.scaler = scaler
         self.classifiers = classifiers
         self.weights = weights
+        self.score = score
 
     def _pipeline(self, scaler, model):
         """
@@ -126,9 +134,12 @@ class GridSearchClassifier:
         predictions = fitted_model.predict(test_set)
         test_time = time() - t2
 
-        score = accuracy_score(y_true=self.test_targets, y_pred=predictions)
+        if self.score == 'accuracy_score':
+            output_score = accuracy_score(y_true=self.test_targets, y_pred=predictions)
+        elif self.score == 'f1_score':
+            output_score = f1_score(y_true=self.test_targets, y_pred=predictions)
 
-        return score, train_time, test_time
+        return output_score, train_time, test_time
 
     def fit(self):
         """
@@ -147,12 +158,12 @@ class GridSearchClassifier:
 
         for classifier in self.classifiers:
             print(f'Testing algorithm: {classifier}')
-            score, train_time, test_time = self._pipeline(scaler=self.scaler, model=classifier)
+            output_score, train_time, test_time = self._pipeline(scaler=self.scaler, model=classifier)
 
             try:
-                df.loc[str(classifier)] = Series({'accuracy': score, 'train_time': train_time, 'test_time': test_time})
+                df.loc[str(classifier)] = Series({'accuracy': output_score, 'train_time': train_time, 'test_time': test_time})
             except ValueError:
-                df.loc[classifier] = Series({'accuracy': score, 'train_time': train_time, 'test_time': test_time})
+                df.loc[classifier] = Series({'accuracy': output_score, 'train_time': train_time, 'test_time': test_time})
 
             df['ranks'] = self.weights[0] * df['accuracy'].rank(ascending=False) + \
                           self.weights[1] * df['train_time'].rank() + \
@@ -164,7 +175,7 @@ class GridSearchClassifier:
 
         return df
 
-
+#TODO - rewrite tests
 class TestGridSearchClassifierOutputIsUnchanged(TestCase):
     """
     Tests that monitor changes to GridSearchClassifier. These tests allow for changes to be made to the source code
