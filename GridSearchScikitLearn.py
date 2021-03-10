@@ -172,7 +172,6 @@ class GridSearchClassifier:
         return df
 
 
-# TODO - rewrite tests
 class TestGridSearchClassifierOutput(TestCase):
     """
     Tests that monitor changes to GridSearchClassifier. These tests allow for changes to be made to the source code
@@ -228,4 +227,5 @@ class TestGridSearchClassifierOutput(TestCase):
     def test_index_dtype(self):
         self.assertEqual(self.output.index.dtype, dtype('O'))
 
+        
 main() if __name__ == '__main__' else None
