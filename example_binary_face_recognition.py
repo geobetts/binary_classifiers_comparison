@@ -12,6 +12,7 @@ from sklearn.tree import DecisionTreeClassifier
 from GridSearchScikitLearn import GridSearchClassifier, scikit_learn_classifiers
 
 from numpy import genfromtxt
+from tabulate import tabulate
 
 array_a = genfromtxt("./a_wh_question_datapoints.txt", skip_header=1)
 target_a = genfromtxt("./a_wh_question_targets.txt")
@@ -23,13 +24,19 @@ output_a_models = GridSearchClassifier(train_set=array_a,
                                        test_set=array_b,
                                        train_targets=target_a,
                                        test_targets=target_b,
-                                       classifiers=scikit_learn_classifiers()).fit()
+                                       classifiers=scikit_learn_classifiers(),
+                                       weights=[0.9, 0.05, 0.05]).fit()
+
+print(tabulate(output_a_models, headers=list(output_a_models)))
 
 output_b_models = GridSearchClassifier(train_set=array_b,
                                        test_set=array_a,
                                        train_targets=target_b,
                                        test_targets=target_a,
-                                       classifiers=scikit_learn_classifiers()).fit()
+                                       classifiers=scikit_learn_classifiers(),
+                                       weights=[0.9, 0.05, 0.05]).fit()
+
+print(tabulate(output_b_models, headers=list(output_b_models)))
 
 # Example looking at different decision tree options
 

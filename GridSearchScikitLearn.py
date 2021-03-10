@@ -24,7 +24,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.dummy import DummyClassifier
 from pandas import DataFrame, Series
-from numpy import ndarray
+from numpy import ndarray, float64, dtype
 from tabulate import tabulate
 
 
@@ -33,8 +33,7 @@ def scikit_learn_classifiers():
     Returns all appropriate scikit learn classifiers in a list.
     """
     classifiers = [DummyClassifier(strategy='most_frequent'), DecisionTreeClassifier(), KNeighborsClassifier(),
-                   RandomForestClassifier(),
-                   MLPClassifier(), SVC(), AdaBoostClassifier(), GaussianProcessClassifier()]
+                   RandomForestClassifier(), MLPClassifier(), SVC(), AdaBoostClassifier(), GaussianProcessClassifier()]
 
     return classifiers
 
@@ -74,7 +73,7 @@ class GridSearchClassifier:
         """
 
         variables = [train_set, test_set, train_targets, test_targets, classifiers, weights]
-        variable_names = ['train_set', 'test_set', 'train_targets', 
+        variable_names = ['train_set', 'test_set', 'train_targets',
                           'test_targets', 'classifiers', 'weights', 'score']
         types = [ndarray, ndarray, ndarray, ndarray, list, list, str]
 
@@ -93,7 +92,7 @@ class GridSearchClassifier:
 
         if sum(weights) != 1:
             raise ValueError(f"The weights must add up to 1. The weights currently add up to {sum(weights)}")
-        
+
         if score not in ['accuracy_score', 'f1_score']:
             raise ValueError(f"{score} is not an option for score. "
                              f"The current options for score are 'accuracy_score', 'f1_score'")
@@ -154,18 +153,13 @@ class GridSearchClassifier:
             DataFrame ranking each algorithm in order. Algorithm name is the index. Accuracy, time and ranks are reported.
         """
 
-        classifier_strings = [str(x) for x in self.classifiers]
-
-        df = DataFrame(columns=['accuracy', 'train_time', 'test_time'], index=classifier_strings)
+        df = DataFrame(columns=['accuracy', 'train_time', 'test_time'])
 
         for classifier in self.classifiers:
             print(f'Testing algorithm: {classifier}')
             output_score, train_time, test_time = self._pipeline(scaler=self.scaler, model=classifier)
 
-            try:
-                df.loc[str(classifier)] = Series({'accuracy': output_score, 'train_time': train_time, 'test_time': test_time})
-            except ValueError:
-                df.loc[classifier] = Series({'accuracy': output_score, 'train_time': train_time, 'test_time': test_time})
+            df.loc[str(classifier)] = Series({'accuracy': output_score, 'train_time': train_time, 'test_time': test_time})
 
             df['ranks'] = self.weights[0] * df['accuracy'].rank(ascending=False) + \
                           self.weights[1] * df['train_time'].rank() + \
@@ -177,36 +171,61 @@ class GridSearchClassifier:
 
         return df
 
-# #TODO - rewrite tests
-# class TestGridSearchClassifierOutputIsUnchanged(TestCase):
-#     """
-#     Tests that monitor changes to GridSearchClassifier. These tests allow for changes to be made to the source code
-#     and to understand if outputs are effected.
-#     """
-#
-#     def __init__(self, *args, **kwargs):
-#         super(TestGridSearchClassifierOutputIsUnchanged, self).__init__(*args, **kwargs)
-#
-#         train_set, train_targets = make_classification(n_samples=1000, n_features=4,
-#                                    n_informative = 2, n_redundant = 0,
-#                                    random_state = 0, shuffle = False)
-#
-#         classifiers = scikit_learn_classifiers()
-#
-#         seed(123)
-#
-#         self.output = GridSearchClassifier(train_set, test_set, train_targets,
-#                                       test_targets, classifiers, [1, 0, 0]).fit()
-#
-#         print('Full output')
-#         print(list(self.output.columns))
-#         print(tabulate(self.output))
-#
-#     def tests_index_of_output(self):
-#         """
-#         Test that the index of the output dataframe is as expected.
-#         Order of index does not effect test.
-#         """
-#
-#
-# main() if __name__ == '__main__' else None
+
+# TODO - rewrite tests
+class TestGridSearchClassifierOutput(TestCase):
+    """
+    Tests that monitor changes to GridSearchClassifier. These tests allow for changes to be made to the source code
+    and to understand if outputs are effected.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(TestGridSearchClassifierOutput, self).__init__(*args, **kwargs)
+
+        train_set, train_targets = make_classification(n_samples=1000, n_features=4,
+                                                       n_informative=2, n_redundant=0,
+                                                       random_state=0, shuffle=False)
+
+        test_set, test_targets = make_classification(n_samples=1000, n_features=4,
+                                                     n_informative=2, n_redundant=0,
+                                                     random_state=6, shuffle=False)
+
+        classifiers = scikit_learn_classifiers()
+
+        seed(123)
+
+        self.output = GridSearchClassifier(train_set, test_set, train_targets,
+                                           test_targets, classifiers, [1, 0, 0]).fit()
+
+        print('Full output')
+        print(list(self.output.columns))
+        print(tabulate(self.output))
+
+    def test_column_names(self):
+        self.assertListEqual(list(self.output.columns),
+                             ['accuracy', 'train_time', 'test_time', 'ranks'])
+
+    def test_shape(self):
+        self.assertTupleEqual(self.output.shape, (8, 4))
+
+    def test_dtypes(self):
+        for x in list(self.output.columns):
+            try:
+                self.assertEqual(self.output[x].dtype, float64)
+            except AssertionError as e:
+                raise AssertionError(f'{e}. Column: {x}')
+
+    def test_min_of_columns(self):
+        for x in list(self.output.columns):
+            try:
+                self.assertGreaterEqual(self.output[x].min(), 0)
+            except AssertionError as e:
+                raise AssertionError(f'{e}. Column: {x}')
+
+    def test_max_accuracy(self):
+        self.assertLessEqual(self.output['accuracy'].max(), 1)
+
+    def test_index_dtype(self):
+        self.assertEqual(self.output.index.dtype, dtype('O'))
+
+main() if __name__ == '__main__' else None
