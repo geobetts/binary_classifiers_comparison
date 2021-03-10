@@ -13,6 +13,7 @@ from random import seed
 from time import time
 from unittest import TestCase, main
 
+from sklearn.datasets import make_classification
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
@@ -23,7 +24,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.dummy import DummyClassifier
 from pandas import DataFrame, Series
-from numpy import ndarray, array
+from numpy import ndarray
+from tabulate import tabulate
 
 
 def scikit_learn_classifiers():
@@ -175,65 +177,36 @@ class GridSearchClassifier:
 
         return df
 
-#TODO - rewrite tests
-class TestGridSearchClassifierOutputIsUnchanged(TestCase):
-    """
-    Tests that monitor changes to GridSearchClassifier. These tests allow for changes to be made to the source code
-    and to understand if outputs are effected.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(TestGridSearchClassifierOutputIsUnchanged, self).__init__(*args, **kwargs)
-
-        train_set = array([[1, 2, 3], [4, 5, 6], [1, 2, 3], [7, 8, 9], [1, 2, 4]])
-        train_targets = array([1, 0, 1, 0, 1])
-
-        test_set = array([[1, 2, 3], [4, 5, 6], [1, 2, 4], [7, 9, 9]])
-        test_targets = array([1, 0, 1, 0])
-
-        classifiers = scikit_learn_classifiers()
-
-        seed(123)
-
-        # ranked on accuracy only to ensure tests are reproducible
-        t = time()
-        output = GridSearchClassifier(train_set, test_set, train_targets,
-                                      test_targets, classifiers, [1, 0, 0]).fit()
-
-        self.output = output.sort_index()
-        self.overall_time = t - time()
-
-    def tests_index_of_output(self):
-        """
-        Test that the index of the output dataframe is as expected.
-        """
-        expected = ['AdaBoostClassifier()',
-                    'DecisionTreeClassifier()',
-                    "DummyClassifier(strategy='most_frequent')",
-                    'GaussianProcessClassifier()',
-                    'KNeighborsClassifier()',
-                    'MLPClassifier()',
-                    'RandomForestClassifier()',
-                    'SVC()']
-
-        print("TEST INDEX OF OUTPUT")
-        print("Actual index:")
-        print(list(self.output.index))
-
-        self.assertListEqual(list(self.output.index), expected)
-
-    def test_accuracy_is_as_expected(self):
-        """
-        Test that the accuracy column is as expected.
-        """
-
-        expected = [1.0, 1.0, 0.5, 1.0, 0.5, 1.0, 1.0, 1.0]
-
-        print("TEST ACCURACY COLUMN OF OUTPUT")
-        print("Actual output:")
-        print(list(self.output.accuracy))
-
-        self.assertListEqual(list(self.output.accuracy), expected)
-
-
-main() if __name__ == '__main__' else None
+# #TODO - rewrite tests
+# class TestGridSearchClassifierOutputIsUnchanged(TestCase):
+#     """
+#     Tests that monitor changes to GridSearchClassifier. These tests allow for changes to be made to the source code
+#     and to understand if outputs are effected.
+#     """
+#
+#     def __init__(self, *args, **kwargs):
+#         super(TestGridSearchClassifierOutputIsUnchanged, self).__init__(*args, **kwargs)
+#
+#         train_set, train_targets = make_classification(n_samples=1000, n_features=4,
+#                                    n_informative = 2, n_redundant = 0,
+#                                    random_state = 0, shuffle = False)
+#
+#         classifiers = scikit_learn_classifiers()
+#
+#         seed(123)
+#
+#         self.output = GridSearchClassifier(train_set, test_set, train_targets,
+#                                       test_targets, classifiers, [1, 0, 0]).fit()
+#
+#         print('Full output')
+#         print(list(self.output.columns))
+#         print(tabulate(self.output))
+#
+#     def tests_index_of_output(self):
+#         """
+#         Test that the index of the output dataframe is as expected.
+#         Order of index does not effect test.
+#         """
+#
+#
+# main() if __name__ == '__main__' else None
