@@ -66,11 +66,14 @@ class GridSearchClassifier:
         score used to measure performance options - 'accuracy_score', 'f1_score'
     """
 
-    def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, weights=[Fraction(1, 3)] * 3,
+    def __init__(self, train_set, test_set, train_targets, test_targets, classifiers, weights=None,
                  scaler=StandardScaler(), score='accuracy_score'):
         """
         Error logging performed and variables set.
         """
+
+        if weights is None:
+            weights = [Fraction(1, 3)] * 3
 
         variables = [train_set, test_set, train_targets, test_targets, classifiers, weights]
         variable_names = ['train_set', 'test_set', 'train_targets',
@@ -123,6 +126,7 @@ class GridSearchClassifier:
             Time taken in seconds for pipeline.
         """
 
+        global output_score
         fitted_scaler = scaler.fit(self.train_set)
         train_set = fitted_scaler.transform(self.train_set)
         test_set = fitted_scaler.transform(self.test_set)
@@ -159,7 +163,8 @@ class GridSearchClassifier:
             print(f'Testing algorithm: {classifier}')
             output_score, train_time, test_time = self._pipeline(scaler=self.scaler, model=classifier)
 
-            df.loc[str(classifier)] = Series({'accuracy': output_score, 'train_time': train_time, 'test_time': test_time})
+            df.loc[str(classifier)] = Series(
+                {'accuracy': output_score, 'train_time': train_time, 'test_time': test_time})
 
             df['ranks'] = self.weights[0] * df['accuracy'].rank(ascending=False) + \
                           self.weights[1] * df['train_time'].rank() + \
@@ -227,5 +232,5 @@ class TestGridSearchClassifierOutput(TestCase):
     def test_index_dtype(self):
         self.assertEqual(self.output.index.dtype, dtype('O'))
 
-        
+
 main() if __name__ == '__main__' else None

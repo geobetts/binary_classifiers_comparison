@@ -6,19 +6,16 @@ The task is to correctly identify when someone was a question beginning with 'wh
 Data has been labelled.
 """
 from itertools import product
-
 from sklearn.tree import DecisionTreeClassifier
-
-from GridSearchScikitLearn import GridSearchClassifier, scikit_learn_classifiers
-
 from numpy import genfromtxt
 from tabulate import tabulate
+from GridSearchScikitLearn import GridSearchClassifier, scikit_learn_classifiers
 
-array_a = genfromtxt("./a_wh_question_datapoints.txt", skip_header=1)
-target_a = genfromtxt("./a_wh_question_targets.txt")
+array_a = genfromtxt("./data/a_wh_question_datapoints.txt", skip_header=1)
+target_a = genfromtxt("./data/a_wh_question_targets.txt")
 
-array_b = genfromtxt("./b_wh_question_datapoints.txt", skip_header=1)
-target_b = genfromtxt("./b_wh_question_targets.txt")
+array_b = genfromtxt("./data/b_wh_question_datapoints.txt", skip_header=1)
+target_b = genfromtxt("./data/b_wh_question_targets.txt")
 
 output_a_models = GridSearchClassifier(train_set=array_a,
                                        test_set=array_b,
@@ -39,7 +36,6 @@ output_b_models = GridSearchClassifier(train_set=array_b,
 print(tabulate(output_b_models, headers=list(output_b_models.columns)))
 
 # Example looking at different decision tree options
-
 
 classifiers = []
 
