@@ -1,5 +1,7 @@
 # binary_classifiers_comparison
 
+![](/alexander-sinn-YYUM2sNvnvU-unsplash.jpg)
+
 Automated comparison of scikit-learn binary classifiers.
 
 ## Brief description of GridSearchClassifier
