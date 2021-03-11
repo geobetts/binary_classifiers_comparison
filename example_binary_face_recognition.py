@@ -27,7 +27,7 @@ output_a_models = GridSearchClassifier(train_set=array_a,
                                        classifiers=scikit_learn_classifiers(),
                                        weights=[0.9, 0.05, 0.05]).fit()
 
-print(tabulate(output_a_models, headers=list(output_a_models)))
+print(tabulate(output_a_models, headers=list(output_a_models.columns)))
 
 output_b_models = GridSearchClassifier(train_set=array_b,
                                        test_set=array_a,
@@ -36,7 +36,7 @@ output_b_models = GridSearchClassifier(train_set=array_b,
                                        classifiers=scikit_learn_classifiers(),
                                        weights=[0.9, 0.05, 0.05]).fit()
 
-print(tabulate(output_b_models, headers=list(output_b_models)))
+print(tabulate(output_b_models, headers=list(output_b_models.columns)))
 
 # Example looking at different decision tree options
 
