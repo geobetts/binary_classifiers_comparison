@@ -1,7 +1,7 @@
 """
 Example of GridSearchClassifier on face recognition.
 
-The task is to correctly identify when someone was a question beginning with 'wh' (so when/where).
+The task is to correctly identify when someone was asking a question beginning with 'wh' (so when/where).
 
 Data has been labelled.
 """
