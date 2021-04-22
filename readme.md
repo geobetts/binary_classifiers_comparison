@@ -1,6 +1,6 @@
 # binary_classifiers_comparison
 
-![](/alexander-sinn-YYUM2sNvnvU-unsplash.jpg)
+![](/alexander-sinn-unsplash.jpg)
 
 Automated comparison of scikit-learn binary classifiers.
 

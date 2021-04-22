@@ -9,13 +9,13 @@ from itertools import product
 from sklearn.tree import DecisionTreeClassifier
 from numpy import genfromtxt
 from tabulate import tabulate
-from GridSearchScikitLearn import GridSearchClassifier, scikit_learn_classifiers
+from grid_search_classifier import GridSearchClassifier, scikit_learn_classifiers
 
-array_a = genfromtxt("./data/a_wh_question_datapoints.txt", skip_header=1)
-target_a = genfromtxt("./data/a_wh_question_targets.txt")
+array_a = genfromtxt("data_a_wh_question_datapoints.txt", skip_header=1)
+target_a = genfromtxt("data_a_wh_question_targets.txt")
 
-array_b = genfromtxt("./data/b_wh_question_datapoints.txt", skip_header=1)
-target_b = genfromtxt("./data/b_wh_question_targets.txt")
+array_b = genfromtxt("data_b_wh_question_datapoints.txt", skip_header=1)
+target_b = genfromtxt("data_b_wh_question_targets.txt")
 
 output_a_models = GridSearchClassifier(train_set=array_a,
                                        test_set=array_b,
