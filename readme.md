@@ -16,7 +16,7 @@ and to choose hyperparameters for a specific algorithm.
 - On smaller data frames.
 - Initial exlploratory of different algorithm performance. 
 - To rule out algorithms.
-- Hyperparamter selection.
+- Hyperparameter selection.
 
 ## Examples
 
