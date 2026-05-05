@@ -173,6 +173,6 @@ class GridSearchClassifier:
             df = df.sort_values(by=['ranks'])
 
         print(f"Best performing algorithm: {df.index[0]}")
+        df.index = df.index.astype(object)
 
         return df
-
